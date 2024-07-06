@@ -1,32 +1,11 @@
-server:
-  port: 8080
-  forward-headers-strategy: NATIVE
-  error:
-    path: /error
-    whitelabel:
-      enabled: true
-    include-exception: true
-    include-message: always
-  servlet:
-    context-path: /
-    session:
-      cookie:
-        path: /
-        name: "SESSION"
+# SOLR
+solr:
+  host: http://localhost:8983/solr
 
+#SPRING DOC AND SWAGGER
 spring:
-  profiles:
-    active: dev
   mvc:
-    servlet:
-      path: /
-
-springdoc:
-  api-docs:
-    enabled: true
-    path: /api/swagger-ui/docs
-  swagger-ui:
-    enabled: true
-    path: /api/swagger-ui # do not change -> now it is correctly on /api/swagger-ui/index.html
-    tags-sorter: alpha
-    operations-sorter: method
+    pathmatch:
+      matching-strategy: ant_path_matcher
+#server:
+#  port: 8081

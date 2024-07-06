@@ -1,4 +1,0 @@
-# Overriding configuration for production server
-
-server:
-  port: 8081
