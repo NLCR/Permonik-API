@@ -1,5 +1,6 @@
 package cz.incad.nkp.inprove.permonikapi.volume;
 
+import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeDTO;
 import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeDetailDTO;
 import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeOverviewStatsDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,7 +29,7 @@ public class VolumeController {
 
     @Operation(summary = "Gets volume by given id")
     @GetMapping("/{id}")
-    public Optional<Volume> getVolumeById(@PathVariable String id) throws SolrServerException, IOException {
+    public Optional<VolumeDTO> getVolumeById(@PathVariable String id) throws SolrServerException, IOException {
         return volumeService.getVolumeById(id);
     }
 

@@ -4,8 +4,10 @@ import cz.incad.nkp.inprove.permonikapi.metaTitle.MetaTitleService;
 import cz.incad.nkp.inprove.permonikapi.specimen.SpecimenService;
 import cz.incad.nkp.inprove.permonikapi.specimen.dto.SpecimensForVolumeDetailDTO;
 import cz.incad.nkp.inprove.permonikapi.specimen.dto.SpecimensForVolumeOverviewDTO;
+import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeDTO;
 import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeDetailDTO;
 import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeOverviewStatsDTO;
+import cz.incad.nkp.inprove.permonikapi.volume.mapper.VolumeDTOMapper;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -27,18 +29,19 @@ public class VolumeService implements VolumeDefinition {
     private final MetaTitleService metaTitleService;
     private final SpecimenService specimenService;
     private final SolrClient solrClient;
+    private final VolumeDTOMapper volumeDTOMapper;
 
     @Autowired
-    public VolumeService(MetaTitleService metaTitleService, SpecimenService specimenService, SolrClient solrClient) {
+    public VolumeService(MetaTitleService metaTitleService, SpecimenService specimenService, SolrClient solrClient, VolumeDTOMapper volumeDTOMapper) {
         this.metaTitleService = metaTitleService;
         this.specimenService = specimenService;
         this.solrClient = solrClient;
+        this.volumeDTOMapper = volumeDTOMapper;
     }
 
-    public Optional<Volume> getVolumeById(String volumeId) throws SolrServerException, IOException {
+    public Optional<VolumeDTO> getVolumeById(String volumeId) throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.addFilterQuery(ID_FIELD + ":\"" + volumeId + "\"");
-        solrQuery.setFields("*", PERIODICITY_FIELD + ":[json]");
         solrQuery.setRows(1);
 
         QueryResponse response = solrClient.query(VOLUME_CORE_NAME, solrQuery);
@@ -46,17 +49,17 @@ public class VolumeService implements VolumeDefinition {
         List<Volume> volumeList = response.getBeans(Volume.class);
 
 
-        return volumeList.isEmpty() ? Optional.empty() : Optional.of(volumeList.get(0));
+        return volumeList.isEmpty() ? Optional.empty() : Optional.of(volumeDTOMapper.apply(volumeList.get(0)));
     }
 
     public Optional<VolumeDetailDTO> getVolumeDetailById(String volumeId) throws SolrServerException, IOException {
         return getVolumeById(volumeId)
                 .flatMap(volume -> {
                             try {
-                                return metaTitleService.getMetaTitleById(volume.getMetaTitleId())
+                                return metaTitleService.getMetaTitleById(volume.metaTitleId())
                                         .flatMap(metaTitle -> {
                                             try {
-                                                SpecimensForVolumeDetailDTO specimensForVolumeDetailDTO = specimenService.getSpecimensForVolumeDetail(volume.getId(), volume.getDateFrom(), volume.getDateTo());
+                                                SpecimensForVolumeDetailDTO specimensForVolumeDetailDTO = specimenService.getSpecimensForVolumeDetail(volume.id(), volume.dateFrom(), volume.dateTo());
 
                                                 return Optional.of(new VolumeDetailDTO(
                                                         volume,
@@ -78,16 +81,16 @@ public class VolumeService implements VolumeDefinition {
         return getVolumeById(volumeId)
                 .flatMap(volume -> {
                             try {
-                                return metaTitleService.getMetaTitleById(volume.getMetaTitleId())
+                                return metaTitleService.getMetaTitleById(volume.metaTitleId())
                                         .flatMap(metaTitle -> {
                                             try {
                                                 SpecimensForVolumeOverviewDTO specimensForVolumeOverview = specimenService.getSpecimensForVolumeOverview(volumeId);
 
                                                 return Optional.of(new VolumeOverviewStatsDTO(
                                                         metaTitle.getName(),
-                                                        volume.getOwnerId(),
-                                                        volume.getSignature(),
-                                                        volume.getBarCode(),
+                                                        volume.ownerId(),
+                                                        volume.signature(),
+                                                        volume.barCode(),
                                                         specimensForVolumeOverview.publicationDayMin(),
                                                         specimensForVolumeOverview.publicationDayMax(),
                                                         specimensForVolumeOverview.numberMin(),

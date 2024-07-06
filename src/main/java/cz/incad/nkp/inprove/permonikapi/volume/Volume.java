@@ -3,8 +3,6 @@ package cz.incad.nkp.inprove.permonikapi.volume;
 import lombok.*;
 import org.apache.solr.client.solrj.beans.Field;
 
-import java.util.List;
-
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,7 +24,8 @@ public class Volume {
     private String metaTitleId; // UUID of metaTitle
     @Field
     private String mutationId; // UUID of mutation
-    /* periodicity schema
+    /*
+    as string
     {
       "day": "Monday",
       "numExists": true,
@@ -38,7 +37,7 @@ public class Volume {
     },
     */
     @Field
-    private List<VolumePeriodicity> periodicity;
+    private String periodicity;
     @Field
     private Integer firstNumber;
     @Field
