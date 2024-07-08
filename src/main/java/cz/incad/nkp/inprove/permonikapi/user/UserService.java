@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 public class UserService implements UserDefinition {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     private final SolrClient solrClient;
 
@@ -36,38 +36,27 @@ public class UserService implements UserDefinition {
 
     }
 
-    public Boolean updateUser(String userId, User user) throws SolrServerException, IOException {
+    public void updateUser(String userId, User user) throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery("*:*");
-        solrQuery.addFilterQuery("id:\"" + userId + "\"");
+        solrQuery.addFilterQuery(ID_FIELD + ":\"" + userId + "\"");
         solrQuery.setRows(1);
 
         QueryResponse response = solrClient.query(USER_CORE_NAME, solrQuery);
 
         List<User> userList = response.getBeans(User.class);
 
-        if (!userList.isEmpty()) {
-
-            User userResponse = userList.get(0);
-
-            userResponse.setEmail(user.getEmail());
-            userResponse.setUserName(user.getUserName());
-            userResponse.setFirstName(user.getFirstName());
-            userResponse.setLastName(user.getLastName());
-            userResponse.setRole(user.getRole());
-            userResponse.setActive(user.getActive());
-            userResponse.setOwners(user.getOwners());
-
-            try {
-                solrClient.addBean(USER_CORE_NAME, userResponse);
-                solrClient.commit(USER_CORE_NAME);
-                return true;
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
-        } else {
-            return false;
+        if (userList.isEmpty()) {
+            throw new RuntimeException("User not found");
         }
+
+        try {
+            solrClient.addBean(USER_CORE_NAME, user);
+            solrClient.commit(USER_CORE_NAME);
+            logger.info("User {} successfully updated", user.getEmail());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
 
     }
 }

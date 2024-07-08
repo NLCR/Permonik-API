@@ -28,9 +28,9 @@ public class UserController {
     }
 
     @Operation(summary = "Updates user")
-    @PutMapping("/{id}/update")
-    public Boolean updateUser(@PathVariable String id, @RequestBody User user) throws SolrServerException, IOException {
-        return userService.updateUser(id, user);
+    @PutMapping("/{id}")
+    public void updateUser(@PathVariable String id, @RequestBody User user) throws SolrServerException, IOException {
+        userService.updateUser(id, user);
     }
 
 }
