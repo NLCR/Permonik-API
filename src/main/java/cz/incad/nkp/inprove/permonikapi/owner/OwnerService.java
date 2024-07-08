@@ -56,7 +56,7 @@ public class OwnerService implements OwnerDefinition {
         try {
             solrClient.addBean(OWNER_CORE_NAME, owner);
             solrClient.commit(OWNER_CORE_NAME);
-            logger.info("Owner {} successfully updated", owner.getName());
+            logger.info("Owner {} successfully updated", owner.getId());
         } catch (Exception e) {
             throw new RuntimeException("Failed to update owner", e);
         }
