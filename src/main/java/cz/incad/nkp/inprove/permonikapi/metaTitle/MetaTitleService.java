@@ -1,6 +1,8 @@
 package cz.incad.nkp.inprove.permonikapi.metaTitle;
 
-import cz.incad.nkp.inprove.permonikapi.metaTitle.dto.MetaTitleOverViewDTO;
+import cz.incad.nkp.inprove.permonikapi.metaTitle.dto.CreatableMetaTitleDTO;
+import cz.incad.nkp.inprove.permonikapi.metaTitle.dto.MetaTitleOverviewDTO;
+import cz.incad.nkp.inprove.permonikapi.metaTitle.mapper.CreatableMetaTitleMapper;
 import cz.incad.nkp.inprove.permonikapi.specimen.SpecimenService;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -18,15 +20,17 @@ import java.util.Optional;
 @Service
 public class MetaTitleService implements MetaTitleDefinition {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SpecimenService.class);
+    private static final Logger logger = LoggerFactory.getLogger(SpecimenService.class);
 
     private final SpecimenService specimenService;
     private final SolrClient solrClient;
+    private final CreatableMetaTitleMapper creatableMetaTitleMapper;
 
     @Autowired
-    public MetaTitleService(SpecimenService specimenService, SolrClient solrClient) {
+    public MetaTitleService(SpecimenService specimenService, SolrClient solrClient, CreatableMetaTitleMapper creatableMetaTitleMapper) {
         this.specimenService = specimenService;
         this.solrClient = solrClient;
+        this.creatableMetaTitleMapper = creatableMetaTitleMapper;
     }
 
     public Optional<MetaTitle> getMetaTitleById(String metaTitleId) throws SolrServerException, IOException {
@@ -40,7 +44,16 @@ public class MetaTitleService implements MetaTitleDefinition {
         return metaTitleList.isEmpty() ? Optional.empty() : Optional.of(metaTitleList.get(0));
     }
 
-    public List<MetaTitle> getAllMetaTitles() throws SolrServerException, IOException {
+    public List<MetaTitle> getMetaTitles() throws SolrServerException, IOException {
+        SolrQuery solrQuery = new SolrQuery("*:*");
+        solrQuery.setRows(100000);
+
+        QueryResponse response = solrClient.query(META_TITLE_CORE_NAME, solrQuery);
+
+        return response.getBeans(MetaTitle.class);
+    }
+
+    public List<MetaTitle> getAllPublicMetaTitles() throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.addFilterQuery(IS_PUBLIC_FIELD + ":true");
         solrQuery.setRows(100000);
@@ -50,13 +63,13 @@ public class MetaTitleService implements MetaTitleDefinition {
         return response.getBeans(MetaTitle.class);
     }
 
-    public List<MetaTitleOverViewDTO> getMetaTitleOverview() throws SolrServerException, IOException {
-        List<MetaTitle> metaTitles = getAllMetaTitles();
+    public List<MetaTitleOverviewDTO> getMetaTitleOverview() throws SolrServerException, IOException {
+        List<MetaTitle> metaTitles = getAllPublicMetaTitles();
         return metaTitles
                 .stream()
                 .map(metaTitle -> {
                     try {
-                        return new MetaTitleOverViewDTO(
+                        return new MetaTitleOverviewDTO(
                                 metaTitle.getId(),
                                 metaTitle.getName(),
                                 specimenService.getStatsForMetaTitleOverview(metaTitle.getId())
@@ -65,6 +78,57 @@ public class MetaTitleService implements MetaTitleDefinition {
                         throw new RuntimeException(e);
                     }
                 }).toList();
+    }
+
+    public void updateMetaTitle(String metaTitleId, MetaTitle metaTitle) throws SolrServerException, IOException {
+        SolrQuery solrQuery = new SolrQuery("*:*");
+        solrQuery.addFilterQuery(ID_FIELD + ":\"" + metaTitleId + "\"");
+        solrQuery.setRows(1);
+
+        QueryResponse response = solrClient.query(META_TITLE_CORE_NAME, solrQuery);
+
+        List<MetaTitle> metaTitleList = response.getBeans(MetaTitle.class);
+
+        if (metaTitleList.isEmpty()) {
+            throw new RuntimeException("MetaTitle not found");
+        }
+
+        try {
+            solrClient.addBean(META_TITLE_CORE_NAME, metaTitle);
+            solrClient.commit(META_TITLE_CORE_NAME);
+            logger.info("MetaTitle {} successfully updated", metaTitle.getName());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update metaTitle", e);
+        }
+
+
+    }
+
+    public void createMetaTitle(CreatableMetaTitleDTO metaTitle) throws SolrServerException, IOException {
+        SolrQuery solrQuery = new SolrQuery("*:*");
+        solrQuery.addFilterQuery(NAME_FIELD + ":\"" + metaTitle.name() + "\"");
+        solrQuery.setRows(1);
+
+        QueryResponse response = solrClient.query(META_TITLE_CORE_NAME, solrQuery);
+
+        List<MetaTitle> metaTitleList = response.getBeans(MetaTitle.class);
+
+        if (!metaTitleList.isEmpty()) {
+            throw new RuntimeException("MetaTitle with this name already exists");
+        }
+
+        MetaTitle newMetaTitle = new MetaTitle();
+        creatableMetaTitleMapper.createMetaTitle(metaTitle, newMetaTitle);
+
+
+        try {
+            solrClient.addBean(META_TITLE_CORE_NAME, newMetaTitle);
+            solrClient.commit(META_TITLE_CORE_NAME);
+            logger.info("MetaTitle {} successfully created", metaTitle);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create metaTitle", e);
+        }
+
     }
 
 }

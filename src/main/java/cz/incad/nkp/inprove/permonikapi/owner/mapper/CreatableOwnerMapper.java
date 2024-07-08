@@ -16,5 +16,5 @@ public interface CreatableOwnerMapper {
     }
 
     @Mapping(target = "id", expression = "java(generateUUID())")
-    void createOwner(CreatableOwnerDTO owner, @MappingTarget Owner target);
+    void createOwner(CreatableOwnerDTO creatableOwnerDTO, @MappingTarget Owner target);
 }

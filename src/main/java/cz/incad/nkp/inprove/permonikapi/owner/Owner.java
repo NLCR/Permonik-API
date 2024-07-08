@@ -13,7 +13,7 @@ import org.apache.solr.client.solrj.beans.Field;
 public class Owner {
 
     @Field
-    private String id;
+    private String id; // UUID
 
     @Field
     private String name;

@@ -1,15 +1,13 @@
 package cz.incad.nkp.inprove.permonikapi.metaTitle;
 
 
-import cz.incad.nkp.inprove.permonikapi.metaTitle.dto.MetaTitleOverViewDTO;
+import cz.incad.nkp.inprove.permonikapi.metaTitle.dto.CreatableMetaTitleDTO;
+import cz.incad.nkp.inprove.permonikapi.metaTitle.dto.MetaTitleOverviewDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -36,9 +34,30 @@ public class MetaTitleController {
     }
 
 
+    @Operation(summary = "List metaTitles overview")
+    @GetMapping("/list/overview")
+    public List<MetaTitleOverviewDTO> getMetaTitleOverview() throws SolrServerException, IOException {
+        return metaTitleService.getMetaTitleOverview();
+    }
+
+
     @Operation(summary = "List all metaTitles")
     @GetMapping("/list/all")
-    public List<MetaTitleOverViewDTO> getMetaTitleOverview() throws SolrServerException, IOException {
-        return metaTitleService.getMetaTitleOverview();
+    public List<MetaTitle> getMetaTitles() throws SolrServerException, IOException {
+        return metaTitleService.getMetaTitles();
+    }
+
+    // NOTE: we can update metaTitle simply, because all cores are using only metaTitleId
+    @Operation(summary = "Updates existing metaTitle")
+    @PutMapping("/{id}")
+    public void updateMetaTitle(@PathVariable String id, @RequestBody MetaTitle metaTitle) throws SolrServerException, IOException {
+        metaTitleService.updateMetaTitle(id, metaTitle);
+    }
+
+
+    @Operation(summary = "Creates new metaTitle")
+    @PostMapping()
+    public void createMetaTitle(@RequestBody CreatableMetaTitleDTO metaTitle) throws SolrServerException, IOException {
+        metaTitleService.createMetaTitle(metaTitle);
     }
 }
