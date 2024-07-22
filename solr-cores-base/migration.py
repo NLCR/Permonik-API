@@ -308,7 +308,7 @@ def migrate_exemplar(meta_title_mapping, volume_mapping, owners_mapping, publica
             "metaTitleId": meta_title_mapping.get(ex.get("id_titul").strip(), ""),
             # "metaTitleName": ex.get("meta_nazev").strip(),
             "volumeId": volume_mapping.get(ex.get("carovy_kod").strip(), ""),
-            "barCode": ex.get("carovy_kod").strip(),
+            "barCode": ex.get("carovy_kod", "").strip(),
             "numExists": ex.get("numExists", False),
             "numMissing": ex.get("missing_number", False),
             # "signature": ex.get("signatura").strip(),
