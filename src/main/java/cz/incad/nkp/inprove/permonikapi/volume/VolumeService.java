@@ -1,12 +1,10 @@
 package cz.incad.nkp.inprove.permonikapi.volume;
 
 import cz.incad.nkp.inprove.permonikapi.metaTitle.MetaTitleService;
+import cz.incad.nkp.inprove.permonikapi.specimen.Specimen;
 import cz.incad.nkp.inprove.permonikapi.specimen.SpecimenService;
-import cz.incad.nkp.inprove.permonikapi.specimen.dto.SpecimensForVolumeDetailDTO;
 import cz.incad.nkp.inprove.permonikapi.specimen.dto.SpecimensForVolumeOverviewDTO;
-import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeDTO;
-import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeDetailDTO;
-import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeOverviewStatsDTO;
+import cz.incad.nkp.inprove.permonikapi.volume.dto.*;
 import cz.incad.nkp.inprove.permonikapi.volume.mapper.VolumeDTOMapper;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -24,7 +22,7 @@ import java.util.Optional;
 @Service
 public class VolumeService implements VolumeDefinition {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(VolumeService.class);
+    private static final Logger logger = LoggerFactory.getLogger(VolumeService.class);
 
     private final MetaTitleService metaTitleService;
     private final SpecimenService specimenService;
@@ -52,24 +50,16 @@ public class VolumeService implements VolumeDefinition {
         return volumeList.isEmpty() ? Optional.empty() : Optional.of(volumeDTOMapper.apply(volumeList.get(0)));
     }
 
-    public Optional<VolumeDetailDTO> getVolumeDetailById(String volumeId) throws SolrServerException, IOException {
+    public Optional<VolumeDetailDTO> getVolumeDetailById(String volumeId, Boolean onlyPublic) throws SolrServerException, IOException {
         return getVolumeById(volumeId)
                 .flatMap(volume -> {
                             try {
-                                return metaTitleService.getMetaTitleById(volume.metaTitleId())
-                                        .flatMap(metaTitle -> {
-                                            try {
-                                                SpecimensForVolumeDetailDTO specimensForVolumeDetailDTO = specimenService.getSpecimensForVolumeDetail(volume.id(), volume.dateFrom(), volume.dateTo());
+                                List<Specimen> specimenList = specimenService.getSpecimensForVolumeDetail(volume.id(), onlyPublic);
 
-                                                return Optional.of(new VolumeDetailDTO(
-                                                        volume,
-                                                        metaTitle,
-                                                        specimensForVolumeDetailDTO
-                                                ));
-                                            } catch (SolrServerException | IOException e) {
-                                                throw new RuntimeException(e);
-                                            }
-                                        });
+                                return Optional.of(new VolumeDetailDTO(
+                                        volume,
+                                        specimenList
+                                ));
                             } catch (SolrServerException | IOException e) {
                                 throw new RuntimeException(e);
                             }
@@ -112,6 +102,39 @@ public class VolumeService implements VolumeDefinition {
                             }
                         }
                 );
+
+    }
+
+    private void updateVolume(Volume volume) {
+        try {
+            solrClient.addBean(VOLUME_CORE_NAME, volume);
+            solrClient.commit(VOLUME_CORE_NAME);
+            logger.info("volume {} successfully updated", volume.getId());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update volume", e);
+        }
+    }
+
+    public String createVolumeWithSpecimens(CreatableVolumeWithSpecimensDTO creatableVolumeWithSpecimensDTO) throws SolrServerException, IOException {
+        // return new uuid of volume
+        return "";
+    }
+
+
+    public void updateVolumeWithSpecimens(String volumeId, UpdatableVolumeWithSpecimensDTO updatableVolumeWithSpecimensDTO) throws SolrServerException, IOException {
+        if (getVolumeById(volumeId).isEmpty()) {
+            throw new RuntimeException("Volume " + volumeId + " not found");
+        }
+
+        this.updateVolume(updatableVolumeWithSpecimensDTO.volume());
+
+        updatableVolumeWithSpecimensDTO.specimens()
+                .forEach(specimenService::updateSpecimen);
+
+    }
+
+    public void updateRegeneratedVolumeWithSpecimens(String volumeId, UpdatableVolumeWithSpecimensDTO updatableVolumeWithSpecimensDTO) throws SolrServerException, IOException {
+        // delete old exemplars and create new ones
 
     }
 }

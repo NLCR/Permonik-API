@@ -2,6 +2,7 @@ package cz.incad.nkp.inprove.permonikapi.specimen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.incad.nkp.inprove.permonikapi.specimen.dto.*;
+import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeDTO;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -17,12 +18,10 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.*;
 
-import static cz.incad.nkp.inprove.permonikapi.specimen.SpecimenDefinition.*;
-
 @Service
-public class SpecimenService {
+public class SpecimenService implements SpecimenDefinition {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SpecimenService.class);
+    private static final Logger logger = LoggerFactory.getLogger(SpecimenService.class);
 
     private final SolrClient solrClient;
 
@@ -127,6 +126,8 @@ public class SpecimenService {
         solrQuery.setRows(rows);
         solrQuery.setStart(offset);
         solrQuery.setSort(PUBLICATION_DATE_STRING_FIELD, SolrQuery.ORDER.asc);
+        // TODO: join is now working, it always returns unknown field volumeId
+//        solrQuery.add("join", "{!join from=volumeId to=id fromIndex=volume}barCode:barCode");
         // TODO this will be sorting based on UUID, that's wrong
         solrQuery.addSort(PUBLICATION_ID_FIELD, SolrQuery.ORDER.desc);
 //        solrQuery.addSort(MUTATION_ID_FIELD, SolrQuery.ORDER.asc);
@@ -178,7 +179,7 @@ public class SpecimenService {
         solrQuery.setFilterQueries(META_TITLE_ID_FIELD + ":\"" + metaTitleId + "\"", NUM_EXISTS_FIELD + ":true");
         solrQuery.setRows(0);
         solrQuery.setStart(0);
-        solrQuery.setSort(PUBLICATION_DATE_STRING_FIELD, SolrQuery.ORDER.asc);
+//        solrQuery.setSort(PUBLICATION_DATE_STRING_FIELD, SolrQuery.ORDER.asc);
         // TODO this will be sorting based on UUID, that's wrong
         solrQuery.addSort(PUBLICATION_ID_FIELD, SolrQuery.ORDER.desc);
 //        solrQuery.addSort(MUTATION_ID_FIELD, SolrQuery.ORDER.asc);
@@ -239,30 +240,36 @@ public class SpecimenService {
     }
 
 
-    public SpecimensForVolumeDetailDTO getSpecimensForVolumeDetail(String volumeId, String dateFrom, String dateTo) throws SolrServerException, IOException {
+    //    public List<Specimen> getSpecimensForVolumeDetail(String volumeId, String dateFrom, String dateTo) throws SolrServerException, IOException {
+    public List<Specimen> getSpecimensForVolumeDetail(String volumeId, Boolean onlyPublic) throws SolrServerException, IOException {
 
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.addFilterQuery(VOLUME_ID_FIELD + ":\"" + volumeId + "\"");
-        solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[" + dateFrom + " TO " + dateTo + "]");
-        solrQuery.addFilterQuery(NUM_EXISTS_FIELD + ":true OR " + NUM_MISSING_FIELD + ":true");
-        solrQuery.setParam(StatsParams.STATS, true);
-        solrQuery.setParam(StatsParams.STATS_FIELD, PUBLICATION_DATE_STRING_FIELD);
+        if (onlyPublic) {
+            solrQuery.addFilterQuery(NUM_EXISTS_FIELD + ":true OR " + NUM_MISSING_FIELD + ":true");
+        }
+//        solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[" + dateFrom + " TO " + dateTo + "]");
+        solrQuery.setSort(PUBLICATION_DATE_STRING_FIELD, SolrQuery.ORDER.asc);
+//        solrQuery.setParam(StatsParams.STATS, true);
+//        solrQuery.setParam(StatsParams.STATS_FIELD, PUBLICATION_DATE_STRING_FIELD);
         solrQuery.setRows(100000);
 
         QueryResponse response = solrClient.query(SPECIMEN_CORE_NAME, solrQuery);
 
-        Map<String, FieldStatsInfo> statsInfo = response.getFieldStatsInfo();
+        return response.getBeans(Specimen.class);
 
-        Object publicationDayMin = statsInfo.get(PUBLICATION_DATE_STRING_FIELD).getMin();
-        Object publicationDayMax = statsInfo.get(PUBLICATION_DATE_STRING_FIELD).getMax();
+//        Map<String, FieldStatsInfo> statsInfo = response.getFieldStatsInfo();
 
-        return new SpecimensForVolumeDetailDTO(
-                response.getBeans(Specimen.class),
-                new SpecimensPublicationRangeDTO(
-                        publicationDayMin,
-                        publicationDayMax
-                )
-        );
+//        Object publicationDayMin = statsInfo.get(PUBLICATION_DATE_STRING_FIELD).getMin();
+//        Object publicationDayMax = statsInfo.get(PUBLICATION_DATE_STRING_FIELD).getMax();
+
+//        return new SpecimensForVolumeDetailDTO(
+//                response.getBeans(Specimen.class),
+//                new SpecimensPublicationRangeDTO(
+//                        publicationDayMin,
+//                        publicationDayMax
+//                )
+//        );
 
     }
 
@@ -349,4 +356,20 @@ public class SpecimenService {
         );
 
     }
+
+    public List<Specimen> generateSpecimens(VolumeDTO volumeDTO) {
+
+        return List.of(new Specimen());
+    }
+
+    public void updateSpecimen(Specimen specimen) {
+        try {
+            solrClient.addBean(SPECIMEN_CORE_NAME, specimen);
+            solrClient.commit(SPECIMEN_CORE_NAME);
+            logger.info("specimen {} successfully updated", specimen.getId());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update specimen", e);
+        }
+    }
+
 }

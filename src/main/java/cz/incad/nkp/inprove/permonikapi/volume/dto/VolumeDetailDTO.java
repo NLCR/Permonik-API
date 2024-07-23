@@ -1,13 +1,13 @@
 package cz.incad.nkp.inprove.permonikapi.volume.dto;
 
-import cz.incad.nkp.inprove.permonikapi.metaTitle.MetaTitle;
-import cz.incad.nkp.inprove.permonikapi.specimen.dto.SpecimensForVolumeDetailDTO;
+import cz.incad.nkp.inprove.permonikapi.specimen.Specimen;
+
+import java.util.List;
 
 
 public record VolumeDetailDTO(
         VolumeDTO volume,
-        MetaTitle metaTitle,
-        SpecimensForVolumeDetailDTO specimens
+        List<Specimen> specimens
 ) {
 }
 

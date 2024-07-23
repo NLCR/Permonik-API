@@ -30,9 +30,9 @@ public class Specimen {
     @Field
     private List<String> damageTypes;
     @Field
-    private List<Integer> damagedPages;
+    private List<Integer> damagedPages; // stored by real pages, so first page = 1, second page = 2 etc. Starting from 1, not 0
     @Field
-    private List<Integer> missingPages;
+    private List<Integer> missingPages; // stored by real pages, so first page = 1, second page = 2 etc. Starting from 1, not 0
     @Field
     private String note;
     @Field

@@ -71,6 +71,7 @@ public class MutationService implements MutationDefinition {
 
     public void createMutation(CreatableMutationDTO mutation) throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery("*:*");
+        // TODO: this filter is not working
         solrQuery.addFilterQuery(NAME_FIELD + ":\"" + mutation.name() + "\"");
         solrQuery.setRows(1);
 

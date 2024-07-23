@@ -2,6 +2,7 @@ package cz.incad.nkp.inprove.permonikapi.specimen;
 
 import cz.incad.nkp.inprove.permonikapi.specimen.dto.FacetsDTO;
 import cz.incad.nkp.inprove.permonikapi.specimen.dto.SearchedSpecimensDTO;
+import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @Tag(name = "Specimen API", description = "API for managing specimens")
 @RestController
@@ -20,6 +22,12 @@ public class SpecimenController {
     @Autowired
     public SpecimenController(SpecimenService specimenService) {
         this.specimenService = specimenService;
+    }
+
+    @Operation(summary = "Generates new specimens for volume")
+    @PostMapping("/regenerate")
+    public List<Specimen> generateSpecimens(@RequestBody VolumeDTO volumeDTO) {
+        return specimenService.generateSpecimens(volumeDTO);
     }
 
     @Operation(summary = "Gets searched specimens for result table")

@@ -71,6 +71,7 @@ public class PublicationService implements PublicationDefinition {
 
     public void createPublication(CreatablePublicationDTO publication) throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery("*:*");
+        // TODO: this filter is not working
         solrQuery.addFilterQuery(NAME_FIELD + ":\"" + publication.name() + "\"");
         solrQuery.setRows(1);
 

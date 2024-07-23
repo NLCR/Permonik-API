@@ -33,6 +33,7 @@ public class OwnerService implements OwnerDefinition {
     public List<Owner> getOwners() throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.setRows(100000);
+        solrQuery.setSort(NAME_FIELD, SolrQuery.ORDER.asc);
 
         QueryResponse response = solrClient.query(OWNER_CORE_NAME, solrQuery);
 
