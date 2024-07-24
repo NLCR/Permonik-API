@@ -114,6 +114,7 @@ def transform_periodicity(old_data, publications_mapping):
         "isPriloha": "isAttachment"
     }
 
+    # TODO: investigate bez označení publicationId. There are numeres ids and string ids I think
     # Transform the data
     new_data = []
     for entry in old_data:
@@ -121,7 +122,7 @@ def transform_periodicity(old_data, publications_mapping):
         for old_field, new_field in field_mapping.items():
             if new_field:  # Skip fields with an empty new_field name
                 if new_field == "publicationId":
-                    transformed_entry[new_field] = publications_mapping.get(entry.get(old_field, ""))
+                    transformed_entry[new_field] = publications_mapping.get(entry.get(old_field, "0"))
                 elif new_field == "pagesCount":
                     transformed_entry[new_field] = extract_number(entry.get(old_field, "0"))
                 elif new_field == "isAttachment":
@@ -161,14 +162,14 @@ def generate_uuid():
 def create_initial_data():
     # Publikace
     publications = [
-        {"id": generate_uuid(), "name": {"cs": "Bez označení", "sk": "Bez označenia", "en": "Without marking"}},
-        {"id": generate_uuid(), "name": {"cs": "Ranní", "sk": "Ranné", "en": "Morning"}},
-        {"id": generate_uuid(), "name": {"cs": "Polední", "sk": "Poludnie", "en": "Midday"}},
-        {"id": generate_uuid(), "name": {"cs": "Odpolední", "sk": "Popoludnie", "en": "Afternoon"}},
-        {"id": generate_uuid(), "name": {"cs": "Večerní", "sk": "Večerné", "en": "Evening"}},
-        {"id": generate_uuid(), "name": {"cs": "Jiné", "sk": "Iné", "en": "Other"}},
-        {"id": generate_uuid(), "name": {"cs": "Jiná příloha", "sk": "Iná príloha", "en": "Another attachment"}},
-        {"id": generate_uuid(), "name": {"cs": "Pravidelná příloha", "sk": "Pravidelná príloha", "en": "Periodic attachment"}}
+        {"id": generate_uuid(), "name": {"cs": "Bez označení", "sk": "Bez označenia", "en": "Without marking"}, "isDefault": True},
+        {"id": generate_uuid(), "name": {"cs": "Ranní", "sk": "Ranné", "en": "Morning"}, "isDefault": False},
+        {"id": generate_uuid(), "name": {"cs": "Polední", "sk": "Poludnie", "en": "Midday"}, "isDefault": False},
+        {"id": generate_uuid(), "name": {"cs": "Odpolední", "sk": "Popoludnie", "en": "Afternoon"}, "isDefault": False},
+        {"id": generate_uuid(), "name": {"cs": "Večerní", "sk": "Večerné", "en": "Evening"}, "isDefault": False},
+        {"id": generate_uuid(), "name": {"cs": "Jiné", "sk": "Iné", "en": "Other"}, "isDefault": False},
+        {"id": generate_uuid(), "name": {"cs": "Jiná příloha", "sk": "Iná príloha", "en": "Another attachment"}, "isDefault": False},
+        {"id": generate_uuid(), "name": {"cs": "Pravidelná příloha", "sk": "Pravidelná príloha", "en": "Periodic attachment"}, "isDefault": False}
     ]
     # Create a new list for Solr submissions
     solr_publications = copy.deepcopy(publications)
@@ -319,7 +320,7 @@ def migrate_exemplar(meta_title_mapping, volume_mapping, owners_mapping, publica
             "note": ex.get("poznamka", "").strip(),
             "name": ex.get("nazev").strip(),
             "subName": ex.get("podnazev").strip(),
-            "publicationId": publications_mapping.get(ex.get("vydani").strip(), ""),
+            "publicationId": publications_mapping.get(ex.get("vydani").strip(), publications_mapping.get("0")),
             "mutationId": mutations_mapping.get(ex.get("mutace").strip()),
             "publicationMark": ex.get("znak_oznaceni_vydani").strip(),
             "publicationDate": ex.get("datum_vydani").strip() if ex.get("datum_vydani") else None,
@@ -337,7 +338,7 @@ def main():
     mappings = create_initial_data()
     migrate_user(mappings["owners"])
     meta_title_mapping = migrate_metatitle()
-    volume_mapping = migrate_volume(meta_title_mapping, mappings["mutations"], mappings["owners"], mappings["publicationsForVolume"])
+    volume_mapping = migrate_volume(meta_title_mapping, mappings["mutations"], mappings["owners"], mappings["publications"])
     migrate_exemplar(meta_title_mapping, volume_mapping, mappings["owners"], mappings["publications"],
                      mappings["mutations"])
 

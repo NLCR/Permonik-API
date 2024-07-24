@@ -23,4 +23,7 @@ public class Publication {
 //    }
     @Field
     private String name;
+
+    @Field
+    private Boolean isDefault;
 }

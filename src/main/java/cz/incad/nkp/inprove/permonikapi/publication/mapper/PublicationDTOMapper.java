@@ -25,7 +25,8 @@ public class PublicationDTOMapper implements Function<Publication, PublicationDT
         try {
             return new PublicationDTO(
                     publication.getId(),
-                    getNames(publication.getName())
+                    getNames(publication.getName()),
+                    publication.getIsDefault()
             );
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);

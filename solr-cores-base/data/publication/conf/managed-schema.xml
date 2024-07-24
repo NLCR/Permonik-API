@@ -112,6 +112,8 @@
 
     <field name="id" type="uuid" indexed="true" stored="true" required="true" multiValued="false" />
     <field name="name" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+    <!-- document with isDefault=true is used for empty volumes and periodicity to fulfill empty value -->
+    <field name="isDefault" type="boolean" indexed="false" stored="true" required="true" multiValued="false" />
 
 
     <!-- docValues are enabled by default for long type so we don't need to index the version field  -->

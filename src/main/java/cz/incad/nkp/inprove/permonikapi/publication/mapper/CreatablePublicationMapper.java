@@ -17,5 +17,6 @@ public interface CreatablePublicationMapper {
     }
 
     @Mapping(target = "id", expression = "java(generateUUID())")
+    @Mapping(target = "isDefault", defaultValue = "false")
     void createPublication(CreatablePublicationDTO creatablePublicationDTO, @MappingTarget Publication target);
 }
