@@ -128,6 +128,16 @@ public class VolumeService implements VolumeDefinition {
         }
     }
 
+    private void deleteVolume(String id) {
+        try {
+            solrClient.deleteById(VOLUME_CORE_NAME, id);
+            solrClient.commit(VOLUME_CORE_NAME);
+            logger.info("volume {} successfully delete", id);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete volume", e);
+        }
+    }
+
     public String createVolumeWithSpecimens(EditableVolumeWithSpecimensDTO editableVolumeWithSpecimensDTO) throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.addFilterQuery(BAR_CODE_FIELD + ":\"" + editableVolumeWithSpecimensDTO.volume().getBarCode() + "\"");
@@ -158,6 +168,18 @@ public class VolumeService implements VolumeDefinition {
         this.updateVolume(editableVolumeWithSpecimensDTO.volume());
 
         specimenService.updateSpecimens(editableVolumeWithSpecimensDTO.specimens());
+
+    }
+
+    public void deleteVolumeWithSpecimens(String volumeId) throws SolrServerException, IOException {
+        if (getVolumeById(volumeId).isEmpty()) {
+            throw new RuntimeException("Volume " + volumeId + " not found");
+        }
+
+        List<Specimen> specimens = specimenService.getSpecimensForVolumeDetail(volumeId, false);
+        specimenService.deleteSpecimens(specimens);
+
+        this.deleteVolume(volumeId);
 
     }
 
