@@ -26,4 +26,7 @@ public class Publication {
 
     @Field
     private Boolean isDefault;
+
+    @Field
+    private Boolean isAttachment;
 }

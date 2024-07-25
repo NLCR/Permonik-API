@@ -49,7 +49,7 @@ public class PublicationService implements PublicationDefinition {
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.addFilterQuery(ID_FIELD + ":\"" + publicationId + "\"");
         solrQuery.setRows(1);
-
+        // TODO: handle is isAttachment changes -> volume and specimens data or make it not changeable
         QueryResponse response = solrClient.query(PUBLICATION_CORE_NAME, solrQuery);
 
         List<Publication> publicationList = response.getBeans(Publication.class);

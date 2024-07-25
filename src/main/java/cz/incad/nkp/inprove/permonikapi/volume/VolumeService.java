@@ -105,6 +105,16 @@ public class VolumeService implements VolumeDefinition {
 
     }
 
+    private void createVolume(Volume volume) {
+        try {
+            solrClient.addBean(VOLUME_CORE_NAME, volume);
+            solrClient.commit(VOLUME_CORE_NAME);
+            logger.info("volume {} successfully created", volume.getId());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create volume", e);
+        }
+    }
+
     private void updateVolume(Volume volume) {
         try {
             solrClient.addBean(VOLUME_CORE_NAME, volume);
@@ -116,8 +126,24 @@ public class VolumeService implements VolumeDefinition {
     }
 
     public String createVolumeWithSpecimens(CreatableVolumeWithSpecimensDTO creatableVolumeWithSpecimensDTO) throws SolrServerException, IOException {
-        // return new uuid of volume
-        return "";
+        SolrQuery solrQuery = new SolrQuery("*:*");
+        solrQuery.addFilterQuery(BAR_CODE_FIELD + ":\"" + creatableVolumeWithSpecimensDTO.volume().getBarCode() + "\"");
+        solrQuery.setRows(1);
+
+        QueryResponse response = solrClient.query(VOLUME_CORE_NAME, solrQuery);
+
+        List<Volume> volumeList = response.getBeans(Volume.class);
+
+        if (!volumeList.isEmpty()) {
+            throw new RuntimeException("Volume with barcode" + creatableVolumeWithSpecimensDTO.volume().getBarCode() + "already exists");
+        }
+
+        this.createVolume(creatableVolumeWithSpecimensDTO.volume());
+
+        specimenService.createSpecimens(creatableVolumeWithSpecimensDTO.specimens());
+
+        return "\"" + creatableVolumeWithSpecimensDTO.volume().getId() + "\"";
+        
     }
 
 
@@ -128,8 +154,7 @@ public class VolumeService implements VolumeDefinition {
 
         this.updateVolume(updatableVolumeWithSpecimensDTO.volume());
 
-        updatableVolumeWithSpecimensDTO.specimens()
-                .forEach(specimenService::updateSpecimen);
+        specimenService.updateSpecimens(updatableVolumeWithSpecimensDTO.specimens());
 
     }
 

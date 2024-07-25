@@ -5,4 +5,5 @@ public interface PublicationDefinition {
     String ID_FIELD = "id";
     String NAME_FIELD = "name";
     String IS_DEFAULT_FIELD = "isDefault";
+    String IS_ATTACHMENT_FIELD = "isAttachment";
 }

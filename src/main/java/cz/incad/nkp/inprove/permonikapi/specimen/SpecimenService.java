@@ -362,13 +362,23 @@ public class SpecimenService implements SpecimenDefinition {
         return List.of(new Specimen());
     }
 
-    public void updateSpecimen(Specimen specimen) {
+    public void createSpecimens(List<Specimen> specimen) {
         try {
-            solrClient.addBean(SPECIMEN_CORE_NAME, specimen);
+            solrClient.addBeans(SPECIMEN_CORE_NAME, specimen);
             solrClient.commit(SPECIMEN_CORE_NAME);
-            logger.info("specimen {} successfully updated", specimen.getId());
+            logger.info("specimens successfully created");
         } catch (Exception e) {
-            throw new RuntimeException("Failed to update specimen", e);
+            throw new RuntimeException("Failed to create specimens", e);
+        }
+    }
+
+    public void updateSpecimens(List<Specimen> specimen) {
+        try {
+            solrClient.addBeans(SPECIMEN_CORE_NAME, specimen);
+            solrClient.commit(SPECIMEN_CORE_NAME);
+            logger.info("specimens successfully updated");
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update specimens", e);
         }
     }
 
