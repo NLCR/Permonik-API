@@ -1,6 +1,9 @@
 package cz.incad.nkp.inprove.permonikapi.volume;
 
-import cz.incad.nkp.inprove.permonikapi.volume.dto.*;
+import cz.incad.nkp.inprove.permonikapi.volume.dto.EditableVolumeWithSpecimensDTO;
+import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeDTO;
+import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeDetailDTO;
+import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeOverviewStatsDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -24,20 +27,20 @@ public class VolumeController {
 
     @Operation(summary = "Creates new volume with specimens")
     @PostMapping()
-    public String createVolumeWithSpecimens(@RequestBody CreatableVolumeWithSpecimensDTO creatableVolumeWithSpecimensDTO) throws SolrServerException, IOException {
-        return volumeService.createVolumeWithSpecimens(creatableVolumeWithSpecimensDTO);
+    public String createVolumeWithSpecimens(@RequestBody EditableVolumeWithSpecimensDTO editableVolumeWithSpecimensDTO) throws SolrServerException, IOException {
+        return volumeService.createVolumeWithSpecimens(editableVolumeWithSpecimensDTO);
     }
 
     @Operation(summary = "Updates existing volume with specimens")
     @PutMapping("/{id}")
-    public void updateVolumeWithSpecimens(@PathVariable String id, @RequestBody UpdatableVolumeWithSpecimensDTO updatableVolumeWithSpecimensDTO) throws SolrServerException, IOException {
-        volumeService.updateVolumeWithSpecimens(id, updatableVolumeWithSpecimensDTO);
+    public void updateVolumeWithSpecimens(@PathVariable String id, @RequestBody EditableVolumeWithSpecimensDTO editableVolumeWithSpecimensDTO) throws SolrServerException, IOException {
+        volumeService.updateVolumeWithSpecimens(id, editableVolumeWithSpecimensDTO);
     }
 
     @Operation(summary = "Updates existing volume with regenerated specimens")
     @PutMapping("/{id}/regenerated")
-    public void updateRegeneratedVolumeWithSpecimens(@PathVariable String id, @RequestBody UpdatableVolumeWithSpecimensDTO updatableVolumeWithSpecimensDTO) throws SolrServerException, IOException {
-        volumeService.updateRegeneratedVolumeWithSpecimens(id, updatableVolumeWithSpecimensDTO);
+    public void updateRegeneratedVolumeWithSpecimens(@PathVariable String id, @RequestBody EditableVolumeWithSpecimensDTO editableVolumeWithSpecimensDTO) throws SolrServerException, IOException {
+        volumeService.updateRegeneratedVolumeWithSpecimens(id, editableVolumeWithSpecimensDTO);
     }
 
     @Operation(summary = "Gets volume by given id")

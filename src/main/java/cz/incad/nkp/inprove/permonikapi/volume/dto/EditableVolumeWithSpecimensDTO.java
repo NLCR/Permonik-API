@@ -5,5 +5,6 @@ import cz.incad.nkp.inprove.permonikapi.volume.Volume;
 
 import java.util.List;
 
-public record UpdatableVolumeWithSpecimensDTO(Volume volume, List<Specimen> specimens) {
+public record EditableVolumeWithSpecimensDTO(Volume volume, List<Specimen> specimens) {
 }
+

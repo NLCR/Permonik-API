@@ -382,4 +382,14 @@ public class SpecimenService implements SpecimenDefinition {
         }
     }
 
+    public void deleteSpecimens(List<Specimen> specimen) {
+        try {
+            solrClient.deleteById(SPECIMEN_CORE_NAME, specimen.stream().map(Specimen::getId).toList());
+            solrClient.commit(SPECIMEN_CORE_NAME);
+            logger.info("specimens successfully deleted");
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete specimens", e);
+        }
+    }
+
 }

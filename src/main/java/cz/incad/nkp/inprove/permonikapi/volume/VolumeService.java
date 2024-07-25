@@ -4,7 +4,10 @@ import cz.incad.nkp.inprove.permonikapi.metaTitle.MetaTitleService;
 import cz.incad.nkp.inprove.permonikapi.specimen.Specimen;
 import cz.incad.nkp.inprove.permonikapi.specimen.SpecimenService;
 import cz.incad.nkp.inprove.permonikapi.specimen.dto.SpecimensForVolumeOverviewDTO;
-import cz.incad.nkp.inprove.permonikapi.volume.dto.*;
+import cz.incad.nkp.inprove.permonikapi.volume.dto.EditableVolumeWithSpecimensDTO;
+import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeDTO;
+import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeDetailDTO;
+import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeOverviewStatsDTO;
 import cz.incad.nkp.inprove.permonikapi.volume.mapper.VolumeDTOMapper;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -125,9 +128,9 @@ public class VolumeService implements VolumeDefinition {
         }
     }
 
-    public String createVolumeWithSpecimens(CreatableVolumeWithSpecimensDTO creatableVolumeWithSpecimensDTO) throws SolrServerException, IOException {
+    public String createVolumeWithSpecimens(EditableVolumeWithSpecimensDTO editableVolumeWithSpecimensDTO) throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery("*:*");
-        solrQuery.addFilterQuery(BAR_CODE_FIELD + ":\"" + creatableVolumeWithSpecimensDTO.volume().getBarCode() + "\"");
+        solrQuery.addFilterQuery(BAR_CODE_FIELD + ":\"" + editableVolumeWithSpecimensDTO.volume().getBarCode() + "\"");
         solrQuery.setRows(1);
 
         QueryResponse response = solrClient.query(VOLUME_CORE_NAME, solrQuery);
@@ -135,31 +138,41 @@ public class VolumeService implements VolumeDefinition {
         List<Volume> volumeList = response.getBeans(Volume.class);
 
         if (!volumeList.isEmpty()) {
-            throw new RuntimeException("Volume with barcode" + creatableVolumeWithSpecimensDTO.volume().getBarCode() + "already exists");
+            throw new RuntimeException("Volume with barcode" + editableVolumeWithSpecimensDTO.volume().getBarCode() + "already exists");
         }
 
-        this.createVolume(creatableVolumeWithSpecimensDTO.volume());
+        this.createVolume(editableVolumeWithSpecimensDTO.volume());
 
-        specimenService.createSpecimens(creatableVolumeWithSpecimensDTO.specimens());
+        specimenService.createSpecimens(editableVolumeWithSpecimensDTO.specimens());
 
-        return "\"" + creatableVolumeWithSpecimensDTO.volume().getId() + "\"";
-        
+        return "\"" + editableVolumeWithSpecimensDTO.volume().getId() + "\"";
+
     }
 
 
-    public void updateVolumeWithSpecimens(String volumeId, UpdatableVolumeWithSpecimensDTO updatableVolumeWithSpecimensDTO) throws SolrServerException, IOException {
+    public void updateVolumeWithSpecimens(String volumeId, EditableVolumeWithSpecimensDTO editableVolumeWithSpecimensDTO) throws SolrServerException, IOException {
         if (getVolumeById(volumeId).isEmpty()) {
             throw new RuntimeException("Volume " + volumeId + " not found");
         }
 
-        this.updateVolume(updatableVolumeWithSpecimensDTO.volume());
+        this.updateVolume(editableVolumeWithSpecimensDTO.volume());
 
-        specimenService.updateSpecimens(updatableVolumeWithSpecimensDTO.specimens());
+        specimenService.updateSpecimens(editableVolumeWithSpecimensDTO.specimens());
 
     }
 
-    public void updateRegeneratedVolumeWithSpecimens(String volumeId, UpdatableVolumeWithSpecimensDTO updatableVolumeWithSpecimensDTO) throws SolrServerException, IOException {
-        // delete old exemplars and create new ones
+    public void updateRegeneratedVolumeWithSpecimens(String volumeId, EditableVolumeWithSpecimensDTO editableVolumeWithSpecimensDTO) throws SolrServerException, IOException {
+        if (getVolumeById(volumeId).isEmpty()) {
+            throw new RuntimeException("Volume " + volumeId + " not found");
+        }
+
+        // delete old specimens
+        List<Specimen> oldSpecimens = specimenService.getSpecimensForVolumeDetail(volumeId, false);
+        specimenService.deleteSpecimens(oldSpecimens);
+
+        this.updateVolume(editableVolumeWithSpecimensDTO.volume());
+
+        specimenService.createSpecimens(editableVolumeWithSpecimensDTO.specimens());
 
     }
 }
