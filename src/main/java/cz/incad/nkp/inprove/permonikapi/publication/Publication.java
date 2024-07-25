@@ -29,4 +29,7 @@ public class Publication {
 
     @Field
     private Boolean isAttachment;
+
+    @Field
+    private Boolean isPeriodicAttachment;
 }
