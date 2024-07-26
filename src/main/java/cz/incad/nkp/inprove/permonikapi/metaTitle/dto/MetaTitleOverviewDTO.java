@@ -1,10 +1,10 @@
 package cz.incad.nkp.inprove.permonikapi.metaTitle.dto;
 
-import cz.incad.nkp.inprove.permonikapi.specimen.dto.StatsForMetatTitleOverviewDTO;
+import cz.incad.nkp.inprove.permonikapi.specimen.dto.StatsForMetaTitleOverviewDTO;
 
 public record MetaTitleOverviewDTO(
         String id,
         String name,
-        StatsForMetatTitleOverviewDTO specimens
+        StatsForMetaTitleOverviewDTO specimens
 ) {
 }

@@ -133,7 +133,9 @@
     <!-- TODO: publicationDate must be required! But need to delete some records which doesnt have it filled up -->
     <field name="publicationDate" type="rdate" indexed="true" stored="true" required="false" multiValued="false" />
     <field name="publicationDateString" type="string" indexed="true" stored="true" required="true" multiValued="false" />
-    <field name="number" type="string" indexed="false" stored="true" required="true" multiValued="false" />
+    <!-- NOTE: here we choose number of attachmentNumber, that's why these fields are optional -->
+    <field name="number" type="string" indexed="false" stored="true" required="false" multiValued="false" />
+    <field name="attachmentNumber" type="string" indexed="false" stored="true" required="false" multiValued="false" />
     <field name="pagesCount" type="pint" indexed="false" stored="true" required="true" multiValued="false" />
     <field name="isAttachment" type="boolean" indexed="true" stored="true" required="true" multiValued="false" />
 

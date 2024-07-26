@@ -162,14 +162,14 @@ def generate_uuid():
 def create_initial_data():
     # Publikace
     publications = [
-        {"id": generate_uuid(), "name": {"cs": "Bez označení", "sk": "Bez označenia", "en": "Without marking"}, "isDefault": True},
-        {"id": generate_uuid(), "name": {"cs": "Ranní", "sk": "Ranné", "en": "Morning"}, "isDefault": False},
-        {"id": generate_uuid(), "name": {"cs": "Polední", "sk": "Poludnie", "en": "Midday"}, "isDefault": False},
-        {"id": generate_uuid(), "name": {"cs": "Odpolední", "sk": "Popoludnie", "en": "Afternoon"}, "isDefault": False},
-        {"id": generate_uuid(), "name": {"cs": "Večerní", "sk": "Večerné", "en": "Evening"}, "isDefault": False},
-        {"id": generate_uuid(), "name": {"cs": "Jiné", "sk": "Iné", "en": "Other"}, "isDefault": False},
-        {"id": generate_uuid(), "name": {"cs": "Jiná příloha", "sk": "Iná príloha", "en": "Another attachment"}, "isDefault": False},
-        {"id": generate_uuid(), "name": {"cs": "Pravidelná příloha", "sk": "Pravidelná príloha", "en": "Periodic attachment"}, "isDefault": False}
+        {"id": generate_uuid(), "name": {"cs": "Bez označení", "sk": "Bez označenia", "en": "Without marking"}, "isDefault": True, "isAttachment": False, "isPeriodicAttachment": False},
+        {"id": generate_uuid(), "name": {"cs": "Ranní", "sk": "Ranné", "en": "Morning"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False},
+        {"id": generate_uuid(), "name": {"cs": "Polední", "sk": "Poludnie", "en": "Midday"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False},
+        {"id": generate_uuid(), "name": {"cs": "Odpolední", "sk": "Popoludnie", "en": "Afternoon"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False},
+        {"id": generate_uuid(), "name": {"cs": "Večerní", "sk": "Večerné", "en": "Evening"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False},
+        {"id": generate_uuid(), "name": {"cs": "Jiné", "sk": "Iné", "en": "Other"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False},
+        {"id": generate_uuid(), "name": {"cs": "Jiná příloha", "sk": "Iná príloha", "en": "Another attachment"}, "isDefault": False, "isAttachment": True, "isPeriodicAttachment": False},
+        {"id": generate_uuid(), "name": {"cs": "Pravidelná příloha", "sk": "Pravidelná príloha", "en": "Periodic attachment"}, "isDefault": False, "isAttachment": True, "isPeriodicAttachment": True}
     ]
     # Create a new list for Solr submissions
     solr_publications = copy.deepcopy(publications)
@@ -325,7 +325,8 @@ def migrate_exemplar(meta_title_mapping, volume_mapping, owners_mapping, publica
             "publicationMark": ex.get("znak_oznaceni_vydani").strip(),
             "publicationDate": ex.get("datum_vydani").strip() if ex.get("datum_vydani") else None,
             "publicationDateString": ex.get("datum_vydani_den", "").strip(),
-            "number": ex.get("cislo", "0").strip(),
+            "number": ex.get("cislo", None) if not ex.get("isPriloha", False) else None,
+            "attachmentNumber": ex.get("cislo", None) if ex.get("isPriloha", False) else None,
             "pagesCount": ex.get("pocet_stran"),
             "isAttachment": ex.get("isPriloha", False)
         }

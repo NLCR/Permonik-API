@@ -21,6 +21,7 @@ public interface SpecimenDefinition {
     String PUBLICATION_DATE_FIELD = "publicationDate";
     String PUBLICATION_DATE_STRING_FIELD = "publicationDateString";
     String NUMBER_FIELD = "number";
+    String ATTACHMENT_NUMBER_FIELD = "attachmentNumber";
     String PAGES_COUNT_FIELD = "pagesCount";
     String IS_ATTACHMENT_FIELD = "isAttachment";
 }

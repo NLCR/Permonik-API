@@ -31,7 +31,7 @@ public class SpecimenService implements SpecimenDefinition {
     }
 
 
-    public StatsForMetatTitleOverviewDTO getStatsForMetaTitleOverview(String metaTitleId) throws SolrServerException, IOException {
+    public StatsForMetaTitleOverviewDTO getStatsForMetaTitleOverview(String metaTitleId) throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.setFilterQueries(META_TITLE_ID_FIELD + ":\"" + metaTitleId + "\"", NUM_EXISTS_FIELD + ":true");
         solrQuery.setParam(StatsParams.STATS, true);
@@ -61,7 +61,7 @@ public class SpecimenService implements SpecimenDefinition {
         Integer matchedSpecimens = groupCommand.getMatches();
 
 
-        return new StatsForMetatTitleOverviewDTO(publicationDayMin, publicationDayMax, mutationsCount, ownersCount, matchedSpecimens);
+        return new StatsForMetaTitleOverviewDTO(publicationDayMin, publicationDayMax, mutationsCount, ownersCount, matchedSpecimens);
 
     }
 

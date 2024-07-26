@@ -50,7 +50,9 @@ public class Specimen {
     @Field
     private String publicationDateString;
     @Field
-    private String number;
+    private String number; // filled if specimen is not attachment
+    @Field
+    private String attachmentNumber; // filled if specimen is attachment
     @Field
     private Integer pagesCount;
     @Field
