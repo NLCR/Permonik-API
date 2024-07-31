@@ -118,6 +118,7 @@
     <field name="role" type="string" indexed="true" stored="true" required="true" multiValued="false" />
     <field name="active" type="boolean" indexed="true" stored="true" required="true" multiValued="false" />
     <field name="owners" type="uuid" indexed="true" stored="true" required="false" multiValued="true" />
+    <field name="password" type="string" indexed="false" stored="true" required="false" multiValued="false" />
 
 
     <!-- docValues are enabled by default for long type so we don't need to index the version field  -->
