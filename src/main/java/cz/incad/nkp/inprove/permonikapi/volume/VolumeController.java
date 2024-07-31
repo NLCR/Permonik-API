@@ -1,7 +1,6 @@
 package cz.incad.nkp.inprove.permonikapi.volume;
 
 import cz.incad.nkp.inprove.permonikapi.volume.dto.EditableVolumeWithSpecimensDTO;
-import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeDTO;
 import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeDetailDTO;
 import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeOverviewStatsDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,11 +48,6 @@ public class VolumeController {
         volumeService.updateRegeneratedVolumeWithSpecimens(id, editableVolumeWithSpecimensDTO);
     }
 
-    @Operation(summary = "Gets volume by given id")
-    @GetMapping("/{id}")
-    public Optional<VolumeDTO> getVolumeById(@PathVariable String id) throws SolrServerException, IOException {
-        return volumeService.getVolumeById(id);
-    }
 
     @Operation(summary = "Gets managed volume detail with specimens by given id")
     @GetMapping("/{id}/detail")

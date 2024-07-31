@@ -2,7 +2,6 @@ package cz.incad.nkp.inprove.permonikapi.specimen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.incad.nkp.inprove.permonikapi.specimen.dto.*;
-import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeDTO;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -357,10 +356,6 @@ public class SpecimenService implements SpecimenDefinition {
 
     }
 
-    public List<Specimen> generateSpecimens(VolumeDTO volumeDTO) {
-
-        return List.of(new Specimen());
-    }
 
     public void createSpecimens(List<Specimen> specimen) {
         try {

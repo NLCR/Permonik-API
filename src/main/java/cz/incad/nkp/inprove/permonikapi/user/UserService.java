@@ -59,4 +59,44 @@ public class UserService implements UserDefinition {
 
 
     }
+
+    public User findUserByUserName(String userName) throws SolrServerException, IOException {
+        SolrQuery solrQuery = new SolrQuery("*:*");
+        solrQuery.addFilterQuery(USERNAME_FIELD + ":\"" + userName + "\"");
+        solrQuery.setRows(1);
+
+        QueryResponse response = solrClient.query(USER_CORE_NAME, solrQuery);
+
+        List<User> userList = response.getBeans(User.class);
+
+        if (userList.isEmpty()) {
+            return null;
+        }
+
+        return userList.get(0);
+    }
+
+    public User createUser(User user) throws SolrServerException, IOException {
+        SolrQuery solrQuery = new SolrQuery("*:*");
+        solrQuery.addFilterQuery(USERNAME_FIELD + ":\"" + user.getUserName() + "\"");
+        solrQuery.setRows(1);
+
+        QueryResponse response = solrClient.query(USER_CORE_NAME, solrQuery);
+
+        List<User> userList = response.getBeans(User.class);
+
+        if (!userList.isEmpty()) {
+            throw new RuntimeException("User already exists");
+        }
+
+        try {
+            solrClient.addBean(USER_CORE_NAME, user);
+            solrClient.commit(USER_CORE_NAME);
+            logger.info("User {} successfully created", user.getEmail());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return user;
+    }
 }

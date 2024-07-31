@@ -1,6 +1,7 @@
 package cz.incad.nkp.inprove.permonikapi.user;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.apache.solr.client.solrj.beans.Field;
 
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
 @ToString
 @Setter
 @Getter
+@SuperBuilder
 public class User implements UserDefinition {
 
     @Field()
@@ -36,5 +38,8 @@ public class User implements UserDefinition {
 
     @Field()
     private List<String> owners;
+
+    @Field()
+    private String password;
 
 }

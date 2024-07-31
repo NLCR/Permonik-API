@@ -11,4 +11,5 @@ public interface UserDefinition {
     String ROLE_FIELD = "role";
     String ACTIVE_FIELD = "active";
     String OWNERS_FIELD = "owners";
+    String PASSWORD_FIELD = "password";
 }
