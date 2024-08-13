@@ -231,7 +231,7 @@ def migrate_user(owners_mapping):
             "email": user.get("email", "").strip(),
             "role": user.get("role").strip(),
             "active": user.get("active", False),
-            "owners": owners_mapping.get(user.get("owner".strip()))
+            "owners": owners_mapping.get(user.get("owner".strip())),
         }
 
         if nazev:
@@ -242,7 +242,7 @@ def migrate_user(owners_mapping):
         else:
             new_user["firstName"] = ""
             new_user["lastName"] = ""
-        if user.get("email"):
+        if user.get("email") and user.get("username") != "admin":
             new_users.append(new_user)
 
     new_solr_users.add(new_users)
