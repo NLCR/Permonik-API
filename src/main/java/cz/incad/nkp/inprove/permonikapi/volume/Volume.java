@@ -25,7 +25,7 @@ public class Volume {
     @Field
     private String mutationId; // UUID of mutation
     /*
-    as string
+    periodicity as string
     {
       "day": "Monday",
       "numExists": true,

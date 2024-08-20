@@ -107,10 +107,12 @@ public class SpecimenService implements SpecimenDefinition {
         }
 
         // Add filtering based on year interval
-        if (specimenFacets.getDateStart() > 0 && specimenFacets.getDateEnd() > 0) {
+        if (specimenFacets.getDateStart() > 0 && specimenFacets.getDateEnd() > 0 && Objects.equals(view, "table")) {
             solrQuery.addFilterQuery(PUBLICATION_DATE_STRING_FIELD + ":[" + specimenFacets.getDateStart() + "0101 TO *]");
             solrQuery.addFilterQuery(PUBLICATION_DATE_STRING_FIELD + ":[* TO " + specimenFacets.getDateEnd() + "1231]");
-        } else if (Objects.equals(view, "calendar") && !specimenFacets.getCalendarDateStart().isEmpty()) {
+        }
+
+        if (Objects.equals(view, "calendar") && specimenFacets.getCalendarDateStart() != null && !specimenFacets.getCalendarDateStart().isEmpty()) {
             solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[" + specimenFacets.getCalendarDateStart() + " TO *]");
             solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[* TO " + specimenFacets.getCalendarDateEnd() + "]");
         }
@@ -125,7 +127,7 @@ public class SpecimenService implements SpecimenDefinition {
         solrQuery.setRows(rows);
         solrQuery.setStart(offset);
         solrQuery.setSort(PUBLICATION_DATE_STRING_FIELD, SolrQuery.ORDER.asc);
-        // TODO: join is now working, it always returns unknown field volumeId
+        // TODO: join is not working, it always returns unknown field volumeId
 //        solrQuery.add("join", "{!join from=volumeId to=id fromIndex=volume}barCode:barCode");
         // TODO this will be sorting based on UUID, that's wrong
         solrQuery.addSort(PUBLICATION_ID_FIELD, SolrQuery.ORDER.desc);
@@ -169,7 +171,7 @@ public class SpecimenService implements SpecimenDefinition {
 
     }
 
-    public FacetsDTO getSpecimensFacets(String metaTitleId, String facets) throws IOException, SolrServerException {
+    public FacetsDTO getSpecimensFacets(String metaTitleId, String facets, String view) throws IOException, SolrServerException {
 
         ObjectMapper objectMapper = new ObjectMapper();
         SpecimenFacets specimenFacets = objectMapper.readValue(facets, SpecimenFacets.class);
@@ -219,7 +221,7 @@ public class SpecimenService implements SpecimenDefinition {
         }
 
         // Add filtering based on year interval
-        if (specimenFacets.getDateStart() > 0 && specimenFacets.getDateEnd() > 0) {
+        if (specimenFacets.getDateStart() > 0 && specimenFacets.getDateEnd() > 0 && Objects.equals(view, "table")) {
             solrQuery.addFilterQuery(PUBLICATION_DATE_STRING_FIELD + ":[" + specimenFacets.getDateStart() + "0101 TO *]");
             solrQuery.addFilterQuery(PUBLICATION_DATE_STRING_FIELD + ":[* TO " + specimenFacets.getDateEnd() + "1231]");
         }
@@ -290,7 +292,7 @@ public class SpecimenService implements SpecimenDefinition {
     }
 
 
-    public SpecimensForVolumeOverviewDTO getSpecimensForVolumeOverview(String volumeId) throws SolrServerException, IOException {
+    public SpecimensForVolumeOverviewStatsDTO getSpecimensForVolumeOverviewStats(String volumeId) throws SolrServerException, IOException {
 
         Calendar date = new GregorianCalendar();
 
@@ -340,7 +342,7 @@ public class SpecimenService implements SpecimenDefinition {
                 .map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getValue(), (long) facetFieldEntry.getCount()))
                 .toList();
 
-        return new SpecimensForVolumeOverviewDTO(
+        return new SpecimensForVolumeOverviewStatsDTO(
                 publicationDayMin,
                 publicationDayMax,
                 numberMin,

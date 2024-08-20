@@ -39,9 +39,10 @@ public class SpecimenController {
     @PostMapping("{id}/list/facets")
     public FacetsDTO getSpecimensFacets(
             @PathVariable String id,
-            @RequestParam String facets
+            @RequestParam String facets,
+            @RequestParam String view
     ) throws IOException, SolrServerException {
-        return specimenService.getSpecimensFacets(id, facets);
+        return specimenService.getSpecimensFacets(id, facets, view);
     }
 
     @Operation(summary = "Gets start date for calendar view")

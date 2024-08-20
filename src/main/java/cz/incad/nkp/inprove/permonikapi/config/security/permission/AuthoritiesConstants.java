@@ -5,6 +5,7 @@ public class AuthoritiesConstants {
     private AuthoritiesConstants() {
     }
 
+    // TODO: this needs to be edited and finished
     // actions
     private static final String WRITE = "_WRITE";
     private static final String DELETE = "_DELETE";

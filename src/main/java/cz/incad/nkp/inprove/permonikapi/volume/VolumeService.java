@@ -3,7 +3,7 @@ package cz.incad.nkp.inprove.permonikapi.volume;
 import cz.incad.nkp.inprove.permonikapi.metaTitle.MetaTitleService;
 import cz.incad.nkp.inprove.permonikapi.specimen.Specimen;
 import cz.incad.nkp.inprove.permonikapi.specimen.SpecimenService;
-import cz.incad.nkp.inprove.permonikapi.specimen.dto.SpecimensForVolumeOverviewDTO;
+import cz.incad.nkp.inprove.permonikapi.specimen.dto.SpecimensForVolumeOverviewStatsDTO;
 import cz.incad.nkp.inprove.permonikapi.volume.dto.EditableVolumeWithSpecimensDTO;
 import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeDTO;
 import cz.incad.nkp.inprove.permonikapi.volume.dto.VolumeDetailDTO;
@@ -77,7 +77,7 @@ public class VolumeService implements VolumeDefinition {
                                 return metaTitleService.getMetaTitleById(volume.metaTitleId())
                                         .flatMap(metaTitle -> {
                                             try {
-                                                SpecimensForVolumeOverviewDTO specimensForVolumeOverview = specimenService.getSpecimensForVolumeOverview(volumeId);
+                                                SpecimensForVolumeOverviewStatsDTO specimensForVolumeOverview = specimenService.getSpecimensForVolumeOverviewStats(volumeId);
 
                                                 return Optional.of(new VolumeOverviewStatsDTO(
                                                         metaTitle.getName(),

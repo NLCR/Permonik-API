@@ -5,7 +5,7 @@ import cz.incad.nkp.inprove.permonikapi.specimen.Specimen;
 
 import java.util.List;
 
-public record SpecimensForVolumeOverviewDTO(
+public record SpecimensForVolumeOverviewStatsDTO(
         Object publicationDayMin,
         Object publicationDayMax,
         Object numberMin,
