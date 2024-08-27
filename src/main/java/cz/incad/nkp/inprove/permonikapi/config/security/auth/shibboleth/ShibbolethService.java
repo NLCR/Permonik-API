@@ -40,12 +40,12 @@ public class ShibbolethService {
 //            "https://shibo.vkol.cz/idp/shibboleth");
 
     public void shibbolethLogin(HttpServletRequest request, HttpServletResponse response) throws IOException, SolrServerException {
-        String idp = (String) request.getAttribute("Shib-Identity-Provider");
+        String idp = request.getHeader("Shib-Identity-Provider");
 //        if (!allowedIdentityProviders.contains(idp)) {
 //            throw new ForbiddenException("This IDP is not allowed");
 //        }
 
-        String eppn = (String) request.getAttribute("eduPersonPrincipalName");
+        String eppn = request.getHeader("eduPersonPrincipalName");
 
         User user = userService.findUserByUserName(eppn);
 
@@ -55,7 +55,10 @@ public class ShibbolethService {
 
         loadUserIntoSecurityContext(user, request);
 
-        response.sendRedirect(response.encodeRedirectURL("/?shibbolethAuth=true"));
+
+        String redirectUrl = String.format("%s://%s%s/", "https", request.getServerName(), request.getContextPath());
+
+        response.sendRedirect(redirectUrl);
     }
 
     private void loadUserIntoSecurityContext(User user, HttpServletRequest request) {
@@ -72,13 +75,13 @@ public class ShibbolethService {
     }
 
     private User createNewShibbolethUser(HttpServletRequest request, String eppn) throws SolrServerException, IOException {
-        String firstName = decodeAndRepairCaseForName((String) request.getAttribute("firstName"));
-        String lastName = decodeAndRepairCaseForName((String) request.getAttribute("lastName"));
+        String firstName = decodeAndRepairCaseForName(request.getHeader("firstName"));
+        String lastName = decodeAndRepairCaseForName(request.getHeader("lastName"));
         String owner = eppn.split("@")[1].split("\\.")[0].toUpperCase();
-        String email = (String) request.getAttribute("email");
-        String eduPersonScopedAffiliation = (String) request.getAttribute("eduPersonScopedAffiliation");
+        String email = request.getHeader("email");
+        String eduPersonScopedAffiliation = request.getHeader("eduPersonScopedAffiliation");
 
-        String a = (String) request.getAttribute("authorized_by_idp");
+        String a = request.getHeader("authorized_by_idp");
 
         // TODO: handle owner id from owners core
         User user = User.builder()
@@ -105,9 +108,18 @@ public class ShibbolethService {
 
     public void shibbolethLogout(HttpServletRequest request, HttpServletResponse response) throws IOException {
         UserDelegate userDelegate = UserProducer.getCurrentUserDelegate();
-        String redirectUrl = userDelegate != null && userDelegate.getIsShibbolethAuth() ?
-                "/Shibboleth.sso/Logout?return=/" : "/";
 
+        // Construct the redirect URL
+        String redirectUrl;
+        if (userDelegate != null && userDelegate.getIsShibbolethAuth()) {
+            redirectUrl = String.format("%s://%s%s/Shibboleth.sso/Logout?return=%s",
+                    "https", request.getServerName(), request.getContextPath(), "/");
+        } else {
+            redirectUrl = String.format("%s://%s%s/",
+                    "https", request.getServerName(), request.getContextPath());
+        }
+
+        // Invalidate session
         HttpSession session = request.getSession(false);
         if (session != null && request.isRequestedSessionIdValid()) {
             session.invalidate();
@@ -115,17 +127,19 @@ public class ShibbolethService {
         SecurityContextHolder.clearContext();
         removeSessionCookie(request, response);
 
-        response.sendRedirect(response.encodeRedirectURL(redirectUrl));
+        // Redirect
+        response.sendRedirect(redirectUrl);
     }
 
     private static void removeSessionCookie(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("JSESSIONID")) {
+                if (cookie.getName().equals("SESSION")) {
                     cookie.setMaxAge(0);
                     cookie.setValue(null);
                     cookie.setPath("/");
+                    cookie.setSecure(true);
                     cookie.setHttpOnly(true);
                     response.addCookie(cookie);
                 }

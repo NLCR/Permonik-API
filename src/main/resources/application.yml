@@ -1,17 +1,6 @@
-# SOLR
 solr:
   host: http://localhost:8983/solr
 
-#SPRING DOC AND SWAGGER
-spring:
-  mvc:
-    pathmatch:
-      matching-strategy: ant_path_matcher
-  profiles:
-    active: dev
-
-#server:
-#  port: 8081
 server:
   port: 8080
   forward-headers-strategy: NATIVE
@@ -21,14 +10,3 @@ server:
       enabled: true
     include-exception: true
     include-message: always
-  servlet:
-    context-path: /
-    session:
-      cookie:
-        path: /
-        name: "SESSION"
-logging:
-  level:
-    org:
-      springframework:
-        security: "DEBUG"
