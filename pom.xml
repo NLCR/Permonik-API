@@ -1,267 +1,212 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<name>permonik-api</name>
-	<description>Permonik API for periodics app</description>
+    <name>permonik-api</name>
+    <description>Permonik API for periodics app</description>
 
-	<groupId>cz.incad.nkp.inprove</groupId>
-	<artifactId>permonik-api</artifactId>
-	<version>1.0.0</version>
+    <groupId>cz.incad.nkp.inprove</groupId>
+    <artifactId>permonik-api</artifactId>
+    <version>1.0.0</version>
 
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.17</version>
-		<relativePath/>
-	</parent>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.1</version>
+        <relativePath/>
+    </parent>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<java.version>17</java.version>
-		<maven.compiler.target>17</maven.compiler.target>
-		<maven.compiler.source>17</maven.compiler.source>
-
-
-		<!-- VERSIONS -->
-		<mockito.version>4.11.0</mockito.version>
-		<assertj.version>3.24.2</assertj.version>
-		<junit.version>4.13.2</junit.version>
-		<lombok.version>1.18.26</lombok.version>
-		<swagger.version>3.0.0</swagger.version>
-		<jackson.version>2.14.2</jackson.version>
-		<spring-solr.version>4.3.15</spring-solr.version>
-		<javax.ws.rs.version>2.1.1</javax.ws.rs.version>
-	</properties>
-
-	<dependencies>
-		<!-- OLD -->
-		<dependency>
-			<groupId>org.apache.solr</groupId>
-			<artifactId>solr-solrj</artifactId>
-			<version>7.1.0</version>
-			<type>jar</type>
-		</dependency>
-		<dependency>
-			<groupId>org.quartz-scheduler</groupId>
-			<artifactId>quartz</artifactId>
-			<version>2.3.2</version>
-			<type>jar</type>
-		</dependency>
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<version>2.7</version>
-			<type>jar</type>
-		</dependency>
-		<dependency>
-			<groupId>com.alibaba</groupId>
-			<artifactId>fastjson</artifactId>
-			<version>1.2.62</version>
-		</dependency>
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>json</artifactId>
-			<version>20230227</version>
-			<type>jar</type>
-		</dependency>
-		<dependency>
-			<groupId>commons-codec</groupId>
-			<artifactId>commons-codec</artifactId>
-			<version>1.7</version>
-			<type>jar</type>
-		</dependency>
-
-		<!--SPRINGBOOT-->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-rest</artifactId>
-		</dependency>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>17</java.version>
+        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
 
 
-		<!-- SPRING SOLR -->
-		<dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-solr</artifactId>
-			<version>${spring-solr.version}</version>
-		</dependency>
+        <!-- VERSIONS -->
+        <lombok.version>1.18.34</lombok.version>
+        <swagger.version>3.0.0</swagger.version>
+        <jackson.version>2.14.2</jackson.version>
+        <solrj.version>9.6.1</solrj.version>
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <slf4j.version>2.0.13</slf4j.version>
+        <logback.version>1.5.6</logback.version>
+        <typescript-generator.version>3.2.1263</typescript-generator.version>
+    </properties>
 
-		<!-- JACKSON -->
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-annotations</artifactId>
-			<version>${jackson.version}</version>
-		</dependency>
+    <dependencies>
+        <!--SPRINGBOOT-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
 
-		<!-- MODEL MAPPER -->
-		<dependency>
-			<groupId>org.modelmapper</groupId>
-			<artifactId>modelmapper</artifactId>
-			<version>3.1.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.github.chhsiao90</groupId>
-			<artifactId>modelmapper-module-java8-datatypes</artifactId>
-			<version>1.2.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.github.chhsiao90</groupId>
-			<artifactId>modelmapper-module-jsr310</artifactId>
-			<version>1.2.1</version>
-		</dependency>
+        <dependency>
+            <groupId>jakarta.ws.rs</groupId>
+            <artifactId>jakarta.ws.rs-api</artifactId>
+            <version>4.0.0</version>
+        </dependency>
 
-		<!-- GUAVA UTILS -->
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>30.1.1-jre</version>
-		</dependency>
 
-		<!-- LOMBOK -->
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>${lombok.version}</version>
-			<scope>compile</scope>
-		</dependency>
+        <!-- SOLR -->
+        <dependency>
+            <groupId>org.apache.solr</groupId>
+            <artifactId>solr-solrj</artifactId>
+            <version>${solrj.version}</version>
+        </dependency>
 
-		<!-- TO GET EXCEPTIONS -->
-		<dependency>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>javax.ws.rs-api</artifactId>
-			<version>${javax.ws.rs.version}</version>
-		</dependency>
+        <!-- JACKSON -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
 
-		<!-- SWAGGER -->
-		<dependency>
-			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-ui</artifactId>
-			<version>1.6.15</version>
-		</dependency>
+        <!-- LOMBOK -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
-		<!-- FOR TESTS -->
+        <!-- MAPSTRUCT -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${mapstruct.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>${mapstruct.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.assertj</groupId>
-			<artifactId>assertj-core</artifactId>
-			<version>${assertj.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish.jersey.core</groupId>
-			<artifactId>jersey-common</artifactId>
-			<version>2.22.2</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+        <!-- SWAGGER -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.0.2</version>
+        </dependency>
 
-	<build>
-		<finalName>permonik-api</finalName>
+        <!-- LOGS -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
 
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.11.0</version>
-			</plugin>
 
-			<plugin>
-				<groupId>cz.habarta.typescript-generator</groupId>
-				<artifactId>typescript-generator-maven-plugin</artifactId>
-				<version>2.37.1128</version>
-				<dependencies>
-					<dependency>
-						<groupId>cz.habarta.typescript-generator</groupId>
-						<artifactId>typescript-generator-spring</artifactId>
-						<version>2.37.1128</version>
-					</dependency>
-				</dependencies>
+        <!-- FOR TESTS -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
-				<executions>
-					<execution>
-						<id>generation-of-api-service</id>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-						<phase>process-classes</phase>
+    <build>
+        <finalName>permonik-api</finalName>
 
-						<configuration>
-							<generateSpringApplicationClient>true</generateSpringApplicationClient>
-							<generateSpringApplicationInterface>true</generateSpringApplicationInterface>
-							<jsonLibrary>jackson2</jsonLibrary>
-							<classesWithAnnotations>
-								org.springframework.web.bind.annotation.RestController
-							</classesWithAnnotations>
-							<outputKind>module</outputKind>
-							<outputFileType>implementationFile</outputFileType>
-							<outputFile>apiService.ts</outputFile>
-						</configuration>
-					</execution>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
 
-					<execution>
-						<id>generation-of-types</id>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-						<phase>process-classes</phase>
+            <plugin>
+                <groupId>cz.habarta.typescript-generator</groupId>
+                <artifactId>typescript-generator-maven-plugin</artifactId>
+                <version>${typescript-generator.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>cz.habarta.typescript-generator</groupId>
+                        <artifactId>typescript-generator-spring</artifactId>
+                        <version>${typescript-generator.version}</version>
+                    </dependency>
+                </dependencies>
 
-						<configuration>
-							<jsonLibrary>jackson2</jsonLibrary>
-							<classesWithAnnotations>
-								org.springframework.data.solr.core.mapping.SolrDocument
-							</classesWithAnnotations>
-							<classPatterns>
-								<pattern>
-									cz.incad.nkp.inprove.**.*Dto
-								</pattern>
-							</classPatterns>
-							<classes>
-								<class>org.springframework.data.domain.Page</class>
-							</classes>
-							<outputKind>module</outputKind>
-							<outputFile>apiTypes.d.ts</outputFile>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+                <executions>
+                    <execution>
+                        <id>generation-of-api-service</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+
+                        <configuration>
+                            <generateSpringApplicationClient>true</generateSpringApplicationClient>
+                            <generateSpringApplicationInterface>true</generateSpringApplicationInterface>
+                            <jsonLibrary>jackson2</jsonLibrary>
+                            <classesWithAnnotations>
+                                org.springframework.web.bind.annotation.RestController
+                            </classesWithAnnotations>
+                            <outputKind>module</outputKind>
+                            <outputFileType>implementationFile</outputFileType>
+                            <outputFile>apiService.ts</outputFile>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>generation-of-types</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+
+                        <configuration>
+                            <jsonLibrary>jackson2</jsonLibrary>
+                            <classesWithAnnotations>
+                                org.springframework.data.solr.core.mapping.SolrDocument
+                            </classesWithAnnotations>
+                            <classPatterns>
+                                <pattern>
+                                    cz.incad.nkp.inprove.**.*Dto
+                                </pattern>
+                            </classPatterns>
+                            <classes>
+                                <class>org.springframework.data.domain.Page</class>
+                            </classes>
+                            <outputKind>module</outputKind>
+                            <outputFile>apiTypes.d.ts</outputFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

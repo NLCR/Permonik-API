@@ -1,4 +1,32 @@
-# Overriding configuration for production server
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+solr:
+  host: http://localhost:8983/solr
 
 server:
-  port: 8081
+  port: 8080
+  forward-headers-strategy: NATIVE
+  error:
+    path: /error
+    whitelabel:
+      enabled: true
+    include-exception: true
+    include-message: always
+  servlet:
+    context-path: /
+    session:
+      cookie:
+        path: /
+        name: "SESSION"
+        secure: true
+        http-only: true
+        same-site: strict
+
+logging:
+  level:
+    org:
+      springframework:
+        security: "INFO"
