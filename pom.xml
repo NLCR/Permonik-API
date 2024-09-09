@@ -13,7 +13,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.1</version>
+        <version>3.3.3</version>
         <relativePath/>
     </parent>
 
@@ -27,11 +27,11 @@
         <!-- VERSIONS -->
         <lombok.version>1.18.34</lombok.version>
         <swagger.version>3.0.0</swagger.version>
-        <jackson.version>2.14.2</jackson.version>
+        <jackson.version>2.17.2</jackson.version>
         <solrj.version>9.6.1</solrj.version>
-        <mapstruct.version>1.5.5.Final</mapstruct.version>
-        <slf4j.version>2.0.13</slf4j.version>
-        <logback.version>1.5.6</logback.version>
+        <mapstruct.version>1.6.0</mapstruct.version>
+        <slf4j.version>2.0.16</slf4j.version>
+        <logback.version>1.5.7</logback.version>
         <typescript-generator.version>3.2.1263</typescript-generator.version>
     </properties>
 
@@ -102,7 +102,7 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-            <version>2.0.2</version>
+            <version>2.6.0</version>
         </dependency>
 
         <!-- LOGS -->
