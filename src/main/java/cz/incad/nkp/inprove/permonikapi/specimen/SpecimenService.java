@@ -117,7 +117,7 @@ public class SpecimenService implements SpecimenDefinition {
             solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[* TO " + specimenFacets.getCalendarDateEnd() + "]");
         }
 
-        // doing it this way, because we need same filters
+        // copy query this way, because we need same filters
         SolrQuery groupQuery;
         groupQuery = solrQuery;
 
@@ -220,7 +220,7 @@ public class SpecimenService implements SpecimenDefinition {
             solrQuery.addFilterQuery(specimenFacets.getBarCodeQueryString());
         }
 
-        // Add filtering based on year interval
+        // Add filtering based on year interval for table view
         if (specimenFacets.getDateStart() > 0 && specimenFacets.getDateEnd() > 0 && Objects.equals(view, "table")) {
             solrQuery.addFilterQuery(PUBLICATION_DATE_STRING_FIELD + ":[" + specimenFacets.getDateStart() + "0101 TO *]");
             solrQuery.addFilterQuery(PUBLICATION_DATE_STRING_FIELD + ":[* TO " + specimenFacets.getDateEnd() + "1231]");

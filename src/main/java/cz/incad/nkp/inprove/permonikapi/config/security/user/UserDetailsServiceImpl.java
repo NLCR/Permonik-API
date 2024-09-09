@@ -5,6 +5,7 @@ import cz.incad.nkp.inprove.permonikapi.config.security.permission.Authorities;
 import cz.incad.nkp.inprove.permonikapi.user.User;
 import cz.incad.nkp.inprove.permonikapi.user.UserService;
 import jakarta.ws.rs.ForbiddenException;
+import jakarta.ws.rs.NotFoundException;
 import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -13,7 +14,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
-import org.webjars.NotFoundException;
 
 import java.util.Collection;
 import java.util.HashSet;

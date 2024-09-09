@@ -1,6 +1,9 @@
 solr:
   host: http://localhost:8983/solr
 
+spring:
+  profiles:
+    active: dev
 server:
   port: 8080
   forward-headers-strategy: NATIVE
@@ -10,3 +13,9 @@ server:
       enabled: true
     include-exception: true
     include-message: always
+
+logging:
+  level:
+    org:
+      springframework:
+        security: "DEBUG"
