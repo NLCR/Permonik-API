@@ -358,6 +358,23 @@ public class SpecimenService implements SpecimenDefinition {
 
     }
 
+    public NamesDTO getSpecimenNamesAndSubNames() throws SolrServerException, IOException {
+        SolrQuery solrQuery = new SolrQuery("*:*");
+        solrQuery.addFilterQuery(NUM_EXISTS_FIELD + ":true");
+        solrQuery.setFacet(true);
+        solrQuery.addFacetField(NAME_FIELD, SUB_NAME_FIELD);
+        solrQuery.setFacetLimit(-1);
+        solrQuery.setFacetMinCount(1);
+        solrQuery.setRows(0);
+
+        QueryResponse response = solrClient.query(SPECIMEN_CORE_NAME, solrQuery);
+
+        return new NamesDTO(
+                response.getFacetField(NAME_FIELD).getValues().stream().map(FacetField.Count::getName).toList(),
+                response.getFacetField(SUB_NAME_FIELD).getValues().stream().map(FacetField.Count::getName).toList()
+        );
+    }
+
 
     public void createSpecimens(List<Specimen> specimen) {
         try {
