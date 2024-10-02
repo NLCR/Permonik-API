@@ -1,6 +1,7 @@
 package cz.incad.nkp.inprove.permonikapi.specimen;
 
 import cz.incad.nkp.inprove.permonikapi.specimen.dto.FacetsDTO;
+import cz.incad.nkp.inprove.permonikapi.specimen.dto.NamesDTO;
 import cz.incad.nkp.inprove.permonikapi.specimen.dto.SearchedSpecimensDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -49,6 +50,12 @@ public class SpecimenController {
     @GetMapping("{id}/start-date")
     public Object getSpecimensStartDate(@PathVariable String id) throws SolrServerException, IOException {
         return specimenService.getSpecimensStartDate(id);
+    }
+
+    @Operation(summary = "Gets names and sub-names from existing specimens")
+    @GetMapping("names")
+    public NamesDTO getSpecimenNamesAndSubNames() throws SolrServerException, IOException {
+        return specimenService.getSpecimenNamesAndSubNames();
     }
 
 
