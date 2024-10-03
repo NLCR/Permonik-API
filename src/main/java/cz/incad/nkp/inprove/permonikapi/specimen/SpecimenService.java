@@ -6,7 +6,6 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.*;
-import org.apache.solr.common.params.FacetParams;
 import org.apache.solr.common.params.GroupParams;
 import org.apache.solr.common.params.StatsParams;
 import org.slf4j.Logger;
@@ -16,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class SpecimenService implements SpecimenDefinition {
@@ -121,9 +121,6 @@ public class SpecimenService implements SpecimenDefinition {
         SolrQuery groupQuery;
         groupQuery = solrQuery;
 
-        solrQuery.setParam(FacetParams.FACET, true);
-        solrQuery.addFacetField(NAME_FIELD, SUB_NAME_FIELD, MUTATION_ID_FIELD, PUBLICATION_ID_FIELD, PUBLICATION_MARK_FIELD, OWNER_ID_FIELD, DAMAGE_TYPES_FIELD);
-        solrQuery.setFacetMinCount(1);
         solrQuery.setRows(rows);
         solrQuery.setStart(offset);
         solrQuery.setSort(PUBLICATION_DATE_STRING_FIELD, SolrQuery.ORDER.asc);
@@ -135,6 +132,9 @@ public class SpecimenService implements SpecimenDefinition {
 
         QueryResponse response = solrClient.query(SPECIMEN_CORE_NAME, solrQuery);
         List<Specimen> specimenList = response.getBeans(Specimen.class);
+        List<String> ownerList = specimenList.stream()
+                .map(Specimen::getOwnerId)
+                .collect(Collectors.toSet()).stream().toList();
 
         SolrQuery statsQuery = new SolrQuery("*:*");
         statsQuery.setFilterQueries(META_TITLE_ID_FIELD + ":\"" + metaTitleId + "\"", NUM_EXISTS_FIELD + ":true");
@@ -166,7 +166,8 @@ public class SpecimenService implements SpecimenDefinition {
                 specimenList,
                 publicationDayMax,
                 publicationDayMin,
-                groupedSpecimens
+                groupedSpecimens,
+                ownerList
         );
 
     }
