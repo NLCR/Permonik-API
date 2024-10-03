@@ -304,7 +304,7 @@ public class SpecimenService implements SpecimenDefinition {
 
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.addFilterQuery(VOLUME_ID_FIELD + ":\"" + volumeId + "\"");
-        solrQuery.addFilterQuery(NUM_EXISTS_FIELD + ":true");
+        solrQuery.addFilterQuery(NUM_EXISTS_FIELD + ":true OR " + NUM_MISSING_FIELD + ":true");
         solrQuery.setParam(StatsParams.STATS, true);
         solrQuery.setParam(StatsParams.STATS_FIELD, NUMBER_FIELD, PUBLICATION_DATE_STRING_FIELD, PAGES_COUNT_FIELD);
         solrQuery.setRows(0);
@@ -325,7 +325,7 @@ public class SpecimenService implements SpecimenDefinition {
 
         SolrQuery solrQuery2 = new SolrQuery("*:*");
         solrQuery2.addFilterQuery(VOLUME_ID_FIELD + ":\"" + volumeId + "\"");
-        solrQuery2.addFilterQuery(NUM_EXISTS_FIELD + ":true");
+        solrQuery2.addFilterQuery(NUM_EXISTS_FIELD + ":true OR " + NUM_MISSING_FIELD + ":true");
         solrQuery2.setRows(100000);
 
         QueryResponse response2 = solrClient.query(SPECIMEN_CORE_NAME, solrQuery2);
