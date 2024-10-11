@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.Optional;
 
 @Tag(name = "Volume API", description = "API for managing volumes")
 @RestController
@@ -51,19 +50,19 @@ public class VolumeController {
 
     @Operation(summary = "Gets managed volume detail with specimens by given id")
     @GetMapping("/{id}/detail")
-    public Optional<VolumeDetailDTO> getMangedVolumeDetailById(@PathVariable String id) throws SolrServerException, IOException {
+    public VolumeDetailDTO getMangedVolumeDetailById(@PathVariable String id) throws SolrServerException, IOException {
         return volumeService.getVolumeDetailById(id, false);
     }
 
     @Operation(summary = "Gets public volume detail with specimens by given id")
     @GetMapping("/{id}/detail/public")
-    public Optional<VolumeDetailDTO> getPublicVolumeDetailById(@PathVariable String id) throws SolrServerException, IOException {
+    public VolumeDetailDTO getPublicVolumeDetailById(@PathVariable String id) throws SolrServerException, IOException {
         return volumeService.getVolumeDetailById(id, true);
     }
 
     @Operation(summary = "Gets volume stats by given id")
     @GetMapping("/{id}/stats")
-    public Optional<VolumeOverviewStatsDTO> getVolumeOverviewStats(@PathVariable String id) throws SolrServerException, IOException {
+    public VolumeOverviewStatsDTO getVolumeOverviewStats(@PathVariable String id) throws SolrServerException, IOException {
         return volumeService.getVolumeOverviewStats(id);
     }
 }

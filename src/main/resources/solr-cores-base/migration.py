@@ -3,6 +3,7 @@ import json
 import pysolr
 import uuid
 import copy
+from datetime import datetime
 
 # Připojení k nové Solr instanci (verze 9)
 new_solr_meta = pysolr.Solr('http://localhost:8983/solr/metatitle', always_commit=True)
@@ -18,6 +19,11 @@ old_solr_meta = pysolr.Solr('http://localhost:8984/solr/titul', always_commit=Tr
 old_solr_volume = pysolr.Solr('http://localhost:8984/solr/svazek', always_commit=True)
 old_solr_exemplar = pysolr.Solr('http://localhost:8984/solr/exemplar', always_commit=True)
 old_solr_users = pysolr.Solr('http://localhost:8984/solr/user', always_commit=True)
+
+
+now = datetime.now()
+current_time = now.strftime('%Y-%m-%dT%H:%M:%S.%f') + '{:03d}'.format(now.microsecond % 1000) + 'Z'
+
 
 
 def extract_damaged_pages(json_string):
@@ -162,14 +168,14 @@ def generate_uuid():
 def create_initial_data():
     # Publikace
     publications = [
-        {"id": generate_uuid(), "name": {"cs": "Bez označení", "sk": "Bez označenia", "en": "Without marking"}, "isDefault": True, "isAttachment": False, "isPeriodicAttachment": False},
-        {"id": generate_uuid(), "name": {"cs": "Ranní", "sk": "Ranné", "en": "Morning"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False},
-        {"id": generate_uuid(), "name": {"cs": "Polední", "sk": "Poludnie", "en": "Midday"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False},
-        {"id": generate_uuid(), "name": {"cs": "Odpolední", "sk": "Popoludnie", "en": "Afternoon"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False},
-        {"id": generate_uuid(), "name": {"cs": "Večerní", "sk": "Večerné", "en": "Evening"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False},
-        {"id": generate_uuid(), "name": {"cs": "Jiné", "sk": "Iné", "en": "Other"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False},
-        {"id": generate_uuid(), "name": {"cs": "Jiná příloha", "sk": "Iná príloha", "en": "Another attachment"}, "isDefault": False, "isAttachment": True, "isPeriodicAttachment": False},
-        {"id": generate_uuid(), "name": {"cs": "Pravidelná příloha", "sk": "Pravidelná príloha", "en": "Periodic attachment"}, "isDefault": False, "isAttachment": True, "isPeriodicAttachment": True}
+        {"id": generate_uuid(), "name": {"cs": "Bez označení", "sk": "Bez označenia", "en": "Without marking"}, "isDefault": True, "isAttachment": False, "isPeriodicAttachment": False, "created": current_time, "createdBy": ""},
+        {"id": generate_uuid(), "name": {"cs": "Ranní", "sk": "Ranné", "en": "Morning"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False, "created": current_time, "createdBy": ""},
+        {"id": generate_uuid(), "name": {"cs": "Polední", "sk": "Poludnie", "en": "Midday"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False, "created": current_time, "createdBy": ""},
+        {"id": generate_uuid(), "name": {"cs": "Odpolední", "sk": "Popoludnie", "en": "Afternoon"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False, "created": current_time, "createdBy": ""},
+        {"id": generate_uuid(), "name": {"cs": "Večerní", "sk": "Večerné", "en": "Evening"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False, "created": current_time, "createdBy": ""},
+        {"id": generate_uuid(), "name": {"cs": "Jiné", "sk": "Iné", "en": "Other"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False, "created": current_time, "createdBy": ""},
+        {"id": generate_uuid(), "name": {"cs": "Jiná příloha", "sk": "Iná príloha", "en": "Another attachment"}, "isDefault": False, "isAttachment": True, "isPeriodicAttachment": False, "created": current_time, "createdBy": ""},
+        {"id": generate_uuid(), "name": {"cs": "Pravidelná příloha", "sk": "Pravidelná príloha", "en": "Periodic attachment"}, "isDefault": False, "isAttachment": True, "isPeriodicAttachment": True, "created": current_time, "createdBy": ""}
     ]
     # Create a new list for Solr submissions
     solr_publications = copy.deepcopy(publications)
@@ -187,10 +193,10 @@ def create_initial_data():
 
     # Mutace
     mutations = [
-        {"id": generate_uuid(), "name": {"cs": "Bez označení", "sk": "Bez označenia", "en": "Without marking"}},
-        {"id": generate_uuid(), "name": {"cs": "Brno", "sk": "Brno", "en": "Brno"}},
-        {"id": generate_uuid(), "name": {"cs": "Praha", "sk": "Praha", "en": "Praha"}},
-        {"id": generate_uuid(), "name": {"cs": "Ostrava", "sk": "Ostrava", "en": "Ostrava"}},
+        {"id": generate_uuid(), "name": {"cs": "Bez označení", "sk": "Bez označenia", "en": "Without marking"}, "created": current_time, "createdBy": ""},
+        {"id": generate_uuid(), "name": {"cs": "Brno", "sk": "Brno", "en": "Brno"}, "created": current_time, "createdBy": ""},
+        {"id": generate_uuid(), "name": {"cs": "Praha", "sk": "Praha", "en": "Praha"}, "created": current_time, "createdBy": ""},
+        {"id": generate_uuid(), "name": {"cs": "Ostrava", "sk": "Ostrava", "en": "Ostrava"}, "created": current_time, "createdBy": ""},
     ]
     solr_mutations = copy.deepcopy(mutations)
 
@@ -203,11 +209,11 @@ def create_initial_data():
 
     # Vlastníci
     owners = [
-        {"id": generate_uuid(), "name": "NKP", "sigla": "ABA001"},
-        {"id": generate_uuid(), "name": "MZK", "sigla": "BOA001"},
-        {"id": generate_uuid(), "name": "VKOL", "sigla": "OLA001"},
-        {"id": generate_uuid(), "name": "KUK", "sigla": "ULG001"},
-        {"id": generate_uuid(), "name": "PaKK", "sigla": "PAG001"}
+        {"id": generate_uuid(), "name": "NKP", "sigla": "ABA001", "created": current_time, "createdBy": ""},
+        {"id": generate_uuid(), "name": "MZK", "sigla": "BOA001", "created": current_time, "createdBy": ""},
+        {"id": generate_uuid(), "name": "VKOL", "sigla": "OLA001", "created": current_time, "createdBy": ""},
+        {"id": generate_uuid(), "name": "KUK", "sigla": "ULG001", "created": current_time, "createdBy": ""},
+        {"id": generate_uuid(), "name": "PaKK", "sigla": "PAG001", "created": current_time, "createdBy": ""}
     ]
     new_solr_owners.add(owners)
 
@@ -259,7 +265,9 @@ def migrate_metatitle():
             "name": meta.get("meta_nazev").strip(),
             # "periodicity": meta.get("periodicita").strip(),
             "note": meta.get("poznamka", "").strip(),
-            "isPublic": meta.get("show_to_not_logged_users", True)
+            "isPublic": meta.get("show_to_not_logged_users", True),
+            "created": current_time,
+            "createdBy": ""
         }
         old_meta_titles_ids.append(meta.get("id"))
         new_meta_titles.append(new_meta)
@@ -291,7 +299,9 @@ def migrate_volume(meta_title_mapping, mutations_mapping, owners_mapping, public
             "signature": vol.get("signatura").strip(),
             "ownerId": owners_mapping.get(vol.get("vlastnik").strip()),
             "year": convert_year(vol.get("year")) if vol.get("year") and len(vol.get("year")) > 0 else convert_year(vol.get("datum_od", "").strip()),
-            "publicationMark": vol.get("znak_oznaceni_vydani").strip()
+            "publicationMark": vol.get("znak_oznaceni_vydani").strip(),
+            "created": current_time,
+            "createdBy": ""
         }
         new_volumes.append(new_vol)
 
@@ -328,7 +338,9 @@ def migrate_exemplar(meta_title_mapping, volume_mapping, owners_mapping, publica
             "number": ex.get("cislo", None) if not ex.get("isPriloha", False) else None,
             "attachmentNumber": ex.get("cislo", None) if ex.get("isPriloha", False) else None,
             "pagesCount": ex.get("pocet_stran"),
-            "isAttachment": ex.get("isPriloha", False)
+            "isAttachment": ex.get("isPriloha", False),
+            "created": current_time,
+            "createdBy": ""
         }
         new_exemplars.append(new_ex)
 

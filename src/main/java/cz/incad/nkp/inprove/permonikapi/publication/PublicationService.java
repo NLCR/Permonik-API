@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.List;
 
+import static cz.incad.nkp.inprove.permonikapi.audit.AuditableDefinition.DELETED_FIELD;
+
 @Service
 public class PublicationService implements PublicationDefinition {
 
@@ -36,6 +38,7 @@ public class PublicationService implements PublicationDefinition {
 
     public List<PublicationDTO> getPublications() throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery("*:*");
+        solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
         solrQuery.setRows(100000);
 
         QueryResponse response = solrClient.query(PUBLICATION_CORE_NAME, solrQuery);
@@ -57,6 +60,8 @@ public class PublicationService implements PublicationDefinition {
         if (publicationList.isEmpty()) {
             throw new RuntimeException("Publication not found");
         }
+
+        publication.preUpdate();
 
         try {
             solrClient.addBean(PUBLICATION_CORE_NAME, publication);
@@ -85,6 +90,8 @@ public class PublicationService implements PublicationDefinition {
 
         Publication newPublication = new Publication();
         creatablePublicationMapper.createPublication(publication, newPublication);
+
+        newPublication.prePersist();
 
 
         try {

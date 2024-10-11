@@ -1,5 +1,6 @@
 package cz.incad.nkp.inprove.permonikapi.specimen;
 
+import cz.incad.nkp.inprove.permonikapi.audit.Auditable;
 import lombok.*;
 import org.apache.solr.client.solrj.beans.Field;
 
@@ -7,11 +8,11 @@ import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @Setter
 @Getter
-public class Specimen {
+public class Specimen extends Auditable {
 
     @Field
     private String id; // UUID

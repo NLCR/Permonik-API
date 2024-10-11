@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.List;
 
+import static cz.incad.nkp.inprove.permonikapi.audit.AuditableDefinition.DELETED_FIELD;
+
 @Service
 public class MutationService implements MutationDefinition {
 
@@ -36,6 +38,7 @@ public class MutationService implements MutationDefinition {
 
     public List<MutationDTO> getMutations() throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery("*:*");
+        solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
         solrQuery.setRows(100000);
 
         QueryResponse response = solrClient.query(MUTATION_CORE_NAME, solrQuery);

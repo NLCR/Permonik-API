@@ -111,19 +111,33 @@
     -->
 
     <field name="id" type="uuid" indexed="true" stored="true" required="true" multiValued="false" />
-    <field name="name" type="string" indexed="true" stored="true" required="true" multiValued="false" />
-    <!-- document with isDefault=true is used for empty volumes and periodicity to fulfill empty value -->
-    <field name="isDefault" type="boolean" indexed="false" stored="true" required="true" multiValued="false" />
-    <field name="isAttachment" type="boolean" indexed="false" stored="true" required="true" multiValued="false" />
-    <field name="isPeriodicAttachment" type="boolean" indexed="false" stored="true" required="true" multiValued="false" />
-
+    <field name="barCode" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+    <field name="dateFrom" type="rdate" indexed="true" stored="true" required="true" multiValued="false" />
+    <field name="dateTo" type="rdate" indexed="true" stored="true" required="true" multiValued="false" />
+    <field name="metaTitleId" type="string" indexed="false" stored="true" required="true" multiValued="false" />
+    <field name="mutationId" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+    <field name="periodicity" type="json" indexed="false" stored="true" required="true" multiValued="false" />
+    <field name="firstNumber" type="pint" indexed="false" stored="true" required="true" multiValued="false" />
+    <field name="lastNumber" type="pint" indexed="false" stored="true" required="true" multiValued="false" />
+    <field name="note" type="string" indexed="false" stored="true" required="true" multiValued="false" />
+    <field name="showAttachmentsAtTheEnd" type="boolean" indexed="false" stored="true" required="true" multiValued="false" />
+    <field name="signature" type="string" indexed="false" stored="true" required="true" multiValued="false" />
+    <field name="ownerId" type="string" indexed="false" stored="true" required="true" multiValued="false" />
+    <field name="year" type="pint" indexed="true" stored="true" required="true" multiValued="false" />
+    <field name="publicationMark" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+    <field name="created" type="rdate" indexed="true" stored="true" required="true" multiValued="false" />
+    <field name="createdBy" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+    <field name="updated" type="rdate" indexed="true" stored="true" required="false" multiValued="false" />
+    <field name="updatedBy" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+    <field name="deleted" type="rdate" indexed="true" stored="true" required="false" multiValued="false" />
+    <field name="deletedBy" type="string" indexed="true" stored="true" required="false" multiValued="false" />
 
     <!-- docValues are enabled by default for long type so we don't need to index the version field  -->
     <field name="_version_" type="plong" indexed="false" stored="false"/>
 
     <!-- If you don't use child/nested documents, then you should remove the next two fields:  -->
     <!-- for nested documents (minimal; points to root document) -->
-<!--    <field name="_root_" type="uuid" indexed="true" stored="false" docValues="false" />-->
+<!--    <field name="_root_" type="string" indexed="true" stored="false" docValues="false" />-->
     <!-- for nested documents (relationship tracking) -->
 <!--    <field name="_nest_path_" type="_nest_path_" /><fieldType name="_nest_path_" class="solr.NestPathField" />-->
 
@@ -208,6 +222,16 @@
     -->
 
     <fieldType name="uuid" class="solr.UUIDField" indexed="true" stored="true" docValues="true"/>
+    <fieldType name="json" class="solr.TextField" indexed="true" stored="true" multiValued="true">
+        <analyzer type="index">
+            <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+            <filter class="solr.LowerCaseFilterFactory"/>
+        </analyzer>
+        <analyzer type="query">
+            <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+            <filter class="solr.LowerCaseFilterFactory"/>
+        </analyzer>
+    </fieldType>
 
     <!-- The StrField type is not analyzed, but indexed/stored verbatim. -->
     <fieldType name="string" class="solr.StrField" sortMissingLast="true" docValues="true" />
@@ -258,6 +282,7 @@
     <!-- KD-tree versions of date fields -->
     <fieldType name="pdate" class="solr.DatePointField" docValues="true"/>
     <fieldType name="pdates" class="solr.DatePointField" docValues="true" multiValued="true"/>
+    <fieldType name="rdate" class="solr.DateRangeField" />
 
     <!--Binary data type. The data should be sent/retrieved in as Base64 encoded Strings -->
     <fieldType name="binary" class="solr.BinaryField"/>

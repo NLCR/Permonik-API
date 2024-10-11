@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static cz.incad.nkp.inprove.permonikapi.audit.AuditableDefinition.DELETED_FIELD;
+
 @Service
 public class SpecimenService implements SpecimenDefinition {
 
@@ -33,6 +35,7 @@ public class SpecimenService implements SpecimenDefinition {
     public StatsForMetaTitleOverviewDTO getStatsForMetaTitleOverview(String metaTitleId) throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.setFilterQueries(META_TITLE_ID_FIELD + ":\"" + metaTitleId + "\"", NUM_EXISTS_FIELD + ":true");
+        solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
         solrQuery.setParam(StatsParams.STATS, true);
         solrQuery.setParam(StatsParams.STATS_FIELD, MUTATION_ID_FIELD, PUBLICATION_DATE_STRING_FIELD, OWNER_ID_FIELD);
         solrQuery.setParam(StatsParams.STATS_CALC_DISTINCT, true);
@@ -72,6 +75,7 @@ public class SpecimenService implements SpecimenDefinition {
 
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.setFilterQueries(META_TITLE_ID_FIELD + ":\"" + metaTitleId + "\"", NUM_EXISTS_FIELD + ":true");
+        solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
 
         if (!specimenFacets.getNames().isEmpty()) {
             solrQuery.addFilterQuery(specimenFacets.getNamesQueryString());
@@ -138,6 +142,7 @@ public class SpecimenService implements SpecimenDefinition {
 
         SolrQuery statsQuery = new SolrQuery("*:*");
         statsQuery.setFilterQueries(META_TITLE_ID_FIELD + ":\"" + metaTitleId + "\"", NUM_EXISTS_FIELD + ":true");
+        statsQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
         statsQuery.setRows(0);
         statsQuery.setParam(StatsParams.STATS, true);
         statsQuery.setParam(StatsParams.STATS_FIELD, PUBLICATION_DATE_STRING_FIELD);
@@ -179,6 +184,7 @@ public class SpecimenService implements SpecimenDefinition {
 
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.setFilterQueries(META_TITLE_ID_FIELD + ":\"" + metaTitleId + "\"", NUM_EXISTS_FIELD + ":true");
+        solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
         solrQuery.setRows(0);
         solrQuery.setStart(0);
 //        solrQuery.setSort(PUBLICATION_DATE_STRING_FIELD, SolrQuery.ORDER.asc);
@@ -250,6 +256,7 @@ public class SpecimenService implements SpecimenDefinition {
         if (onlyPublic) {
             solrQuery.addFilterQuery(NUM_EXISTS_FIELD + ":true OR " + NUM_MISSING_FIELD + ":true");
         }
+        solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
 //        solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[" + dateFrom + " TO " + dateTo + "]");
         solrQuery.setSort(PUBLICATION_DATE_STRING_FIELD, SolrQuery.ORDER.asc);
 //        solrQuery.setParam(StatsParams.STATS, true);
@@ -280,6 +287,7 @@ public class SpecimenService implements SpecimenDefinition {
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.addFilterQuery(META_TITLE_ID_FIELD + ":\"" + metaTitleId + "\"");
         solrQuery.addFilterQuery(NUM_EXISTS_FIELD + ":true");
+        solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
         solrQuery.setParam(StatsParams.STATS, true);
         solrQuery.setParam(StatsParams.STATS_FIELD, PUBLICATION_DATE_STRING_FIELD);
         solrQuery.setRows(0);
@@ -306,6 +314,7 @@ public class SpecimenService implements SpecimenDefinition {
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.addFilterQuery(VOLUME_ID_FIELD + ":\"" + volumeId + "\"");
         solrQuery.addFilterQuery(NUM_EXISTS_FIELD + ":true");
+        solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
         solrQuery.setParam(StatsParams.STATS, true);
         solrQuery.setParam(StatsParams.STATS_FIELD, NUMBER_FIELD, PUBLICATION_DATE_STRING_FIELD, PAGES_COUNT_FIELD);
         solrQuery.setRows(0);
@@ -327,6 +336,7 @@ public class SpecimenService implements SpecimenDefinition {
         SolrQuery solrQuery2 = new SolrQuery("*:*");
         solrQuery2.addFilterQuery(VOLUME_ID_FIELD + ":\"" + volumeId + "\"");
         solrQuery2.addFilterQuery(NUM_EXISTS_FIELD + ":true OR " + NUM_MISSING_FIELD + ":true");
+        solrQuery2.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
         solrQuery2.setRows(100000);
 
         QueryResponse response2 = solrClient.query(SPECIMEN_CORE_NAME, solrQuery2);
@@ -362,6 +372,7 @@ public class SpecimenService implements SpecimenDefinition {
     public NamesDTO getSpecimenNamesAndSubNames() throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.addFilterQuery(NUM_EXISTS_FIELD + ":true");
+        solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
         solrQuery.setFacet(true);
         solrQuery.addFacetField(NAME_FIELD, SUB_NAME_FIELD);
         solrQuery.setFacetLimit(-1);
@@ -377,9 +388,11 @@ public class SpecimenService implements SpecimenDefinition {
     }
 
 
-    public void createSpecimens(List<Specimen> specimen) {
+    public void createSpecimens(List<Specimen> specimens) {
         try {
-            solrClient.addBeans(SPECIMEN_CORE_NAME, specimen);
+            List<Specimen> specimenList = specimens.stream().peek(Specimen::prePersist).toList();
+
+            solrClient.addBeans(SPECIMEN_CORE_NAME, specimenList);
             solrClient.commit(SPECIMEN_CORE_NAME);
             logger.info("specimens successfully created");
         } catch (Exception e) {
@@ -387,9 +400,11 @@ public class SpecimenService implements SpecimenDefinition {
         }
     }
 
-    public void updateSpecimens(List<Specimen> specimen) {
+    public void updateSpecimens(List<Specimen> specimens) {
         try {
-            solrClient.addBeans(SPECIMEN_CORE_NAME, specimen);
+            List<Specimen> specimenList = specimens.stream().peek(Specimen::preUpdate).toList();
+
+            solrClient.addBeans(SPECIMEN_CORE_NAME, specimenList);
             solrClient.commit(SPECIMEN_CORE_NAME);
             logger.info("specimens successfully updated");
         } catch (Exception e) {
@@ -397,9 +412,11 @@ public class SpecimenService implements SpecimenDefinition {
         }
     }
 
-    public void deleteSpecimens(List<Specimen> specimen) {
+    public void deleteSpecimens(List<Specimen> specimens) {
         try {
-            solrClient.deleteById(SPECIMEN_CORE_NAME, specimen.stream().map(Specimen::getId).toList());
+            List<Specimen> specimenList = specimens.stream().peek(Specimen::preRemove).toList();
+
+            solrClient.addBeans(SPECIMEN_CORE_NAME, specimenList);
             solrClient.commit(SPECIMEN_CORE_NAME);
             logger.info("specimens successfully deleted");
         } catch (Exception e) {

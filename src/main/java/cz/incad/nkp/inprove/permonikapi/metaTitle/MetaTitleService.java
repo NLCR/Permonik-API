@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import static cz.incad.nkp.inprove.permonikapi.audit.AuditableDefinition.DELETED_FIELD;
+
 @Service
 public class MetaTitleService implements MetaTitleDefinition {
 
@@ -36,6 +38,7 @@ public class MetaTitleService implements MetaTitleDefinition {
     public Optional<MetaTitle> getMetaTitleById(String metaTitleId) throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.addFilterQuery(IS_PUBLIC_FIELD + ":true", ID_FIELD + ":\"" + metaTitleId + "\"");
+        solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
         solrQuery.setRows(1);
 
         QueryResponse response = solrClient.query(META_TITLE_CORE_NAME, solrQuery);
@@ -46,6 +49,7 @@ public class MetaTitleService implements MetaTitleDefinition {
 
     public List<MetaTitle> getMetaTitles() throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery("*:*");
+        solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
         solrQuery.setRows(100000);
 
         QueryResponse response = solrClient.query(META_TITLE_CORE_NAME, solrQuery);
@@ -56,6 +60,7 @@ public class MetaTitleService implements MetaTitleDefinition {
     public List<MetaTitle> getAllPublicMetaTitles() throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.addFilterQuery(IS_PUBLIC_FIELD + ":true");
+        solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
         solrQuery.setRows(100000);
 
         QueryResponse response = solrClient.query(META_TITLE_CORE_NAME, solrQuery);
@@ -93,6 +98,8 @@ public class MetaTitleService implements MetaTitleDefinition {
             throw new RuntimeException("MetaTitle not found");
         }
 
+        metaTitle.preUpdate();
+
         try {
             solrClient.addBean(META_TITLE_CORE_NAME, metaTitle);
             solrClient.commit(META_TITLE_CORE_NAME);
@@ -119,6 +126,8 @@ public class MetaTitleService implements MetaTitleDefinition {
 
         MetaTitle newMetaTitle = new MetaTitle();
         creatableMetaTitleMapper.createMetaTitle(metaTitle, newMetaTitle);
+
+        newMetaTitle.prePersist();
 
 
         try {

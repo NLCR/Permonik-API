@@ -40,7 +40,13 @@ public class VolumeDTOMapper implements Function<Volume, VolumeDTO> {
                     volume.getSignature(),
                     volume.getOwnerId(),
                     volume.getYear(),
-                    volume.getPublicationMark()
+                    volume.getPublicationMark(),
+                    volume.getCreated(),
+                    volume.getCreatedBy(),
+                    volume.getUpdated(),
+                    volume.getUpdatedBy(),
+                    volume.getDeleted(),
+                    volume.getDeletedBy()
             );
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
