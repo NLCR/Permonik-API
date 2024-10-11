@@ -13,7 +13,7 @@ import java.util.List;
 @Setter
 @Getter
 @SuperBuilder
-public class User implements UserDefinition {
+public class User {
 
     @Field()
     private String id;

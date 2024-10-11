@@ -1,16 +1,17 @@
 package cz.incad.nkp.inprove.permonikapi.volume;
 
+import cz.incad.nkp.inprove.permonikapi.audit.Auditable;
 import lombok.*;
 import org.apache.solr.client.solrj.beans.Field;
 
 
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
-@Setter
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @Getter
-public class Volume {
+@Setter
+public class Volume extends Auditable {
 
     @Field
     private String id; // UUID
@@ -54,5 +55,18 @@ public class Volume {
     private Integer year;
     @Field
     private String publicationMark;
+//
+//    @Field
+//    private LocalDateTime created;
+//    @Field
+//    private String createdBy;
+//    @Field
+//    private LocalDateTime updated;
+//    @Field
+//    private String updatedBy;
+//    @Field
+//    private LocalDateTime deleted;
+//    @Field
+//    private String deletedBy;
 
 }

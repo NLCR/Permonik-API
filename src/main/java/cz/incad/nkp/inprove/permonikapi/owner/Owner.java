@@ -1,16 +1,17 @@
 package cz.incad.nkp.inprove.permonikapi.owner;
 
 
+import cz.incad.nkp.inprove.permonikapi.audit.Auditable;
 import lombok.*;
 import org.apache.solr.client.solrj.beans.Field;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @Setter
 @Getter
-public class Owner {
+public class Owner extends Auditable {
 
     @Field
     private String id; // UUID

@@ -111,10 +111,16 @@
     -->
 
     <field name="id" type="uuid" indexed="true" stored="true" required="true" multiValued="false" />
-    <field name="name" type="string" indexed="true" stored="true" required="true" multiValued="false" />
-    <field name="sigla" type="string" indexed="true" stored="true" required="true" multiValued="false" />
-
-
+    <field name="name" type="string" indexed="false" stored="true" required="true" multiValued="false" />
+    <field name="note" type="string" indexed="false" stored="true" required="true" multiValued="false" />
+<!--    <field name="periodicity" type="string" indexed="false" stored="true" required="true" multiValued="false" />-->
+    <field name="isPublic" type="boolean" indexed="true" stored="true" required="true" multiValued="false" />
+    <field name="created" type="rdate" indexed="true" stored="true" required="true" multiValued="false" />
+    <field name="createdBy" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+    <field name="updated" type="rdate" indexed="true" stored="true" required="false" multiValued="false" />
+    <field name="updatedBy" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+    <field name="deleted" type="rdate" indexed="true" stored="true" required="false" multiValued="false" />
+    <field name="deletedBy" type="string" indexed="true" stored="true" required="false" multiValued="false" />
     <!-- docValues are enabled by default for long type so we don't need to index the version field  -->
     <field name="_version_" type="plong" indexed="false" stored="false"/>
 
@@ -255,6 +261,7 @@
     <!-- KD-tree versions of date fields -->
     <fieldType name="pdate" class="solr.DatePointField" docValues="true"/>
     <fieldType name="pdates" class="solr.DatePointField" docValues="true" multiValued="true"/>
+    <fieldType name="rdate" class="solr.DateRangeField" />
 
     <!--Binary data type. The data should be sent/retrieved in as Base64 encoded Strings -->
     <fieldType name="binary" class="solr.BinaryField"/>

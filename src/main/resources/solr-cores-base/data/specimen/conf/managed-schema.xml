@@ -138,6 +138,12 @@
     <field name="attachmentNumber" type="string" indexed="false" stored="true" required="false" multiValued="false" />
     <field name="pagesCount" type="pint" indexed="false" stored="true" required="true" multiValued="false" />
     <field name="isAttachment" type="boolean" indexed="true" stored="true" required="true" multiValued="false" />
+    <field name="created" type="rdate" indexed="true" stored="true" required="true" multiValued="false" />
+    <field name="createdBy" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+    <field name="updated" type="rdate" indexed="true" stored="true" required="false" multiValued="false" />
+    <field name="updatedBy" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+    <field name="deleted" type="rdate" indexed="true" stored="true" required="false" multiValued="false" />
+    <field name="deletedBy" type="string" indexed="true" stored="true" required="false" multiValued="false" />
 
 
     <!-- docValues are enabled by default for long type so we don't need to index the version field  -->
