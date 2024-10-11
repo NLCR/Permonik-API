@@ -12,7 +12,7 @@ new_solr_exemplar = pysolr.Solr('http://localhost:8983/solr/specimen', always_co
 new_solr_users = pysolr.Solr('http://localhost:8983/solr/user', always_commit=True)
 new_solr_owners = pysolr.Solr('http://localhost:8983/solr/owner', always_commit=True)
 new_solr_mutations = pysolr.Solr('http://localhost:8983/solr/mutation', always_commit=True)
-new_solr_publications = pysolr.Solr('http://localhost:8983/solr/publication', always_commit=True)
+new_solr_editions = pysolr.Solr('http://localhost:8983/solr/edition', always_commit=True)
 
 # Připojení ke staré Solr instanci (verze 8)
 old_solr_meta = pysolr.Solr('http://localhost:8984/solr/titul', always_commit=True)
@@ -104,7 +104,7 @@ def convert_year(year):
     return 0
 
 
-def transform_periodicity(old_data, publications_mapping):
+def transform_periodicity(old_data, editions_mapping):
     # Load the old data if it's in string format
     if isinstance(old_data, str):
         old_data = json.loads(old_data)
@@ -113,22 +113,22 @@ def transform_periodicity(old_data, publications_mapping):
     field_mapping = {
         "den": "day",
         "active": "numExists",
-        "vydani": "publicationId",
+        "vydani": "editionId",
         "pocet_stran": "pagesCount",
         "nazev": "name",
         "podnazev": "subName",
         "isPriloha": "isAttachment"
     }
 
-    # TODO: investigate bez označení publicationId. There are numeres ids and string ids I think
+    # TODO: investigate bez označení editionId. There are numeres ids and string ids I think
     # Transform the data
     new_data = []
     for entry in old_data:
         transformed_entry = {}
         for old_field, new_field in field_mapping.items():
             if new_field:  # Skip fields with an empty new_field name
-                if new_field == "publicationId":
-                    transformed_entry[new_field] = publications_mapping.get(entry.get(old_field, "0"))
+                if new_field == "editionId":
+                    transformed_entry[new_field] = editions_mapping.get(entry.get(old_field, "0"))
                 elif new_field == "pagesCount":
                     transformed_entry[new_field] = extract_number(entry.get(old_field, "0"))
                 elif new_field == "isAttachment":
@@ -166,8 +166,8 @@ def generate_uuid():
 
 
 def create_initial_data():
-    # Publikace
-    publications = [
+    # Edice
+    editions = [
         {"id": generate_uuid(), "name": {"cs": "Bez označení", "sk": "Bez označenia", "en": "Without marking"}, "isDefault": True, "isAttachment": False, "isPeriodicAttachment": False, "created": current_time, "createdBy": ""},
         {"id": generate_uuid(), "name": {"cs": "Ranní", "sk": "Ranné", "en": "Morning"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False, "created": current_time, "createdBy": ""},
         {"id": generate_uuid(), "name": {"cs": "Polední", "sk": "Poludnie", "en": "Midday"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False, "created": current_time, "createdBy": ""},
@@ -178,17 +178,17 @@ def create_initial_data():
         {"id": generate_uuid(), "name": {"cs": "Pravidelná příloha", "sk": "Pravidelná príloha", "en": "Periodic attachment"}, "isDefault": False, "isAttachment": True, "isPeriodicAttachment": True, "created": current_time, "createdBy": ""}
     ]
     # Create a new list for Solr submissions
-    solr_publications = copy.deepcopy(publications)
+    solr_editions = copy.deepcopy(editions)
 
     # Convert the 'name' field to a JSON string in the new list
-    for publication in solr_publications:
-        publication['name'] = json.dumps(publication['name'])
+    for edition in solr_editions:
+        edition['name'] = json.dumps(edition['name'])
 
-    # Add publications to Solr
-    new_solr_publications.add(solr_publications)
+    # Add editions to Solr
+    new_solr_editions.add(solr_editions)
 
     volume_mappings = ["", "morning", "midday", "afternoon", "evening", "special", "attachment", "periodic_attachment"]
-    for pub, volume_mapping in zip(publications, volume_mappings):
+    for pub, volume_mapping in zip(editions, volume_mappings):
         pub["volumeMapping"] = volume_mapping
 
     # Mutace
@@ -218,8 +218,8 @@ def create_initial_data():
     new_solr_owners.add(owners)
 
     return {
-        "publications": {str(idx): pub["id"] for idx, pub in enumerate(publications)},
-        "publicationsForVolume": {pub["volumeMapping"]: pub["id"] for pub in publications},
+        "editions": {str(idx): pub["id"] for idx, pub in enumerate(editions)},
+        "editionsForVolume": {pub["volumeMapping"]: pub["id"] for pub in editions},
         "mutations": {str(idx): mut["id"] for idx, mut in enumerate(mutations)},
         "owners": {str(idx): owner["id"] for idx, owner in enumerate(owners)}
     }
@@ -279,7 +279,7 @@ def migrate_metatitle():
     return {meta["old_id"]: meta["id"] for meta in new_meta_titles}  # Return mapping for further use
 
 
-def migrate_volume(meta_title_mapping, mutations_mapping, owners_mapping, publications_mapping):
+def migrate_volume(meta_title_mapping, mutations_mapping, owners_mapping, editions_mapping):
     old_volumes = old_solr_volume.search('*:*', rows=1000000)  # Adjust the number of rows as needed
     new_volumes = []
 
@@ -291,7 +291,7 @@ def migrate_volume(meta_title_mapping, mutations_mapping, owners_mapping, public
             "dateTo": vol.get("datum_do").strip(),
             "metaTitleId": meta_title_mapping.get(vol.get("id_titul").strip(), ""),
             "mutationId": mutations_mapping.get(vol.get("mutace").strip()),
-            "periodicity": transform_periodicity(vol.get("periodicita").strip(), publications_mapping),
+            "periodicity": transform_periodicity(vol.get("periodicita").strip(), editions_mapping),
             "firstNumber": vol.get("prvni_cislo").strip(),
             "lastNumber": vol.get("posledni_cislo").strip(),
             "note": vol.get("poznamka", "").strip(),
@@ -299,7 +299,7 @@ def migrate_volume(meta_title_mapping, mutations_mapping, owners_mapping, public
             "signature": vol.get("signatura").strip(),
             "ownerId": owners_mapping.get(vol.get("vlastnik").strip()),
             "year": convert_year(vol.get("year")) if vol.get("year") and len(vol.get("year")) > 0 else convert_year(vol.get("datum_od", "").strip()),
-            "publicationMark": vol.get("znak_oznaceni_vydani").strip(),
+            "mutationMark": vol.get("znak_oznaceni_vydani").strip(),
             "created": current_time,
             "createdBy": ""
         }
@@ -309,7 +309,7 @@ def migrate_volume(meta_title_mapping, mutations_mapping, owners_mapping, public
     return {vol["barCode"]: vol["id"] for vol in new_volumes}  # Return mapping for further use
 
 
-def migrate_exemplar(meta_title_mapping, volume_mapping, owners_mapping, publications_mapping, mutations_mapping):
+def migrate_exemplar(meta_title_mapping, volume_mapping, owners_mapping, editions_mapping, mutations_mapping):
     old_exemplars = old_solr_exemplar.search('*:*', rows=1000000)  # Adjust the number of rows as needed
     new_exemplars = []
 
@@ -330,9 +330,9 @@ def migrate_exemplar(meta_title_mapping, volume_mapping, owners_mapping, publica
             "note": ex.get("poznamka", "").strip(),
             "name": ex.get("nazev").strip(),
             "subName": ex.get("podnazev").strip(),
-            "publicationId": publications_mapping.get(ex.get("vydani").strip(), publications_mapping.get("0")),
+            "editionId": editions_mapping.get(ex.get("vydani").strip(), editions_mapping.get("0")),
             "mutationId": mutations_mapping.get(ex.get("mutace").strip()),
-            "publicationMark": ex.get("znak_oznaceni_vydani").strip(),
+            "mutationMark": ex.get("znak_oznaceni_vydani").strip(),
             "publicationDate": ex.get("datum_vydani").strip() if ex.get("datum_vydani") else None,
             "publicationDateString": ex.get("datum_vydani_den", "").strip(),
             "number": ex.get("cislo", None) if not ex.get("isPriloha", False) else None,
@@ -351,8 +351,8 @@ def main():
     mappings = create_initial_data()
     migrate_user(mappings["owners"])
     meta_title_mapping = migrate_metatitle()
-    volume_mapping = migrate_volume(meta_title_mapping, mappings["mutations"], mappings["owners"], mappings["publications"])
-    migrate_exemplar(meta_title_mapping, volume_mapping, mappings["owners"], mappings["publications"],
+    volume_mapping = migrate_volume(meta_title_mapping, mappings["mutations"], mappings["owners"], mappings["editions"])
+    migrate_exemplar(meta_title_mapping, volume_mapping, mappings["owners"], mappings["editions"],
                      mappings["mutations"])
 
 

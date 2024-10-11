@@ -1,4 +1,4 @@
-package cz.incad.nkp.inprove.permonikapi.publication;
+package cz.incad.nkp.inprove.permonikapi.edition;
 
 
 import cz.incad.nkp.inprove.permonikapi.audit.Auditable;
@@ -11,7 +11,7 @@ import org.apache.solr.client.solrj.beans.Field;
 @ToString(callSuper = true)
 @Setter
 @Getter
-public class Publication extends Auditable {
+public class Edition extends Auditable {
 
     @Field
     private String id; // UUID

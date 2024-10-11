@@ -89,12 +89,12 @@ public class SpecimenService implements SpecimenDefinition {
             solrQuery.addFilterQuery(specimenFacets.getMutationsQueryString());
         }
 
-        if (!specimenFacets.getPublicationIds().isEmpty()) {
-            solrQuery.addFilterQuery(specimenFacets.getPublicationsQueryString());
+        if (!specimenFacets.getEditionIds().isEmpty()) {
+            solrQuery.addFilterQuery(specimenFacets.getEditionsQueryString());
         }
 
-        if (!specimenFacets.getPublicationMarks().isEmpty()) {
-            solrQuery.addFilterQuery(specimenFacets.getPublicationMarkQueryString());
+        if (!specimenFacets.getMutationMarks().isEmpty()) {
+            solrQuery.addFilterQuery(specimenFacets.getMutationMarkQueryString());
         }
 
 
@@ -131,7 +131,7 @@ public class SpecimenService implements SpecimenDefinition {
         // TODO: join is not working, it always returns unknown field volumeId
 //        solrQuery.add("join", "{!join from=volumeId to=id fromIndex=volume}barCode:barCode");
         // TODO this will be sorting based on UUID, that's wrong
-        solrQuery.addSort(PUBLICATION_ID_FIELD, SolrQuery.ORDER.desc);
+        solrQuery.addSort(EDITION_ID_FIELD, SolrQuery.ORDER.desc);
 //        solrQuery.addSort(MUTATION_ID_FIELD, SolrQuery.ORDER.asc);
 
         QueryResponse response = solrClient.query(SPECIMEN_CORE_NAME, solrQuery);
@@ -189,10 +189,10 @@ public class SpecimenService implements SpecimenDefinition {
         solrQuery.setStart(0);
 //        solrQuery.setSort(PUBLICATION_DATE_STRING_FIELD, SolrQuery.ORDER.asc);
         // TODO this will be sorting based on UUID, that's wrong
-        solrQuery.addSort(PUBLICATION_ID_FIELD, SolrQuery.ORDER.desc);
+        solrQuery.addSort(EDITION_ID_FIELD, SolrQuery.ORDER.desc);
 //        solrQuery.addSort(MUTATION_ID_FIELD, SolrQuery.ORDER.asc);
         solrQuery.setFacet(true);
-        solrQuery.addFacetField(NAME_FIELD, SUB_NAME_FIELD, MUTATION_ID_FIELD, PUBLICATION_ID_FIELD, PUBLICATION_MARK_FIELD, OWNER_ID_FIELD, DAMAGE_TYPES_FIELD);
+        solrQuery.addFacetField(NAME_FIELD, SUB_NAME_FIELD, MUTATION_ID_FIELD, EDITION_ID_FIELD, MUTATION_MARK_FIELD, OWNER_ID_FIELD, DAMAGE_TYPES_FIELD);
         solrQuery.setFacetMinCount(1);
 
         if (!specimenFacets.getNames().isEmpty()) {
@@ -207,12 +207,12 @@ public class SpecimenService implements SpecimenDefinition {
             solrQuery.addFilterQuery(specimenFacets.getMutationsQueryString());
         }
 
-        if (!specimenFacets.getPublicationIds().isEmpty()) {
-            solrQuery.addFilterQuery(specimenFacets.getPublicationsQueryString());
+        if (!specimenFacets.getEditionIds().isEmpty()) {
+            solrQuery.addFilterQuery(specimenFacets.getEditionsQueryString());
         }
 
-        if (!specimenFacets.getPublicationMarks().isEmpty()) {
-            solrQuery.addFilterQuery(specimenFacets.getPublicationMarkQueryString());
+        if (!specimenFacets.getMutationMarks().isEmpty()) {
+            solrQuery.addFilterQuery(specimenFacets.getMutationMarkQueryString());
         }
 
         if (!specimenFacets.getOwnerIds().isEmpty()) {
@@ -239,8 +239,8 @@ public class SpecimenService implements SpecimenDefinition {
                 response.getFacetField(NAME_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
                 response.getFacetField(SUB_NAME_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
                 response.getFacetField(MUTATION_ID_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
-                response.getFacetField(PUBLICATION_ID_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
-                response.getFacetField(PUBLICATION_MARK_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
+                response.getFacetField(EDITION_ID_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
+                response.getFacetField(MUTATION_MARK_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
                 response.getFacetField(OWNER_ID_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
                 response.getFacetField(DAMAGE_TYPES_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList()
         );
@@ -319,7 +319,7 @@ public class SpecimenService implements SpecimenDefinition {
         solrQuery.setParam(StatsParams.STATS_FIELD, NUMBER_FIELD, PUBLICATION_DATE_STRING_FIELD, PAGES_COUNT_FIELD);
         solrQuery.setRows(0);
         solrQuery.setFacet(true);
-        solrQuery.addFacetField(MUTATION_ID_FIELD, PUBLICATION_MARK_FIELD, PUBLICATION_ID_FIELD, DAMAGE_TYPES_FIELD);
+        solrQuery.addFacetField(MUTATION_ID_FIELD, MUTATION_MARK_FIELD, EDITION_ID_FIELD, DAMAGE_TYPES_FIELD);
         solrQuery.addDateRangeFacet(PUBLICATION_DATE_FIELD, startDate, endDate, "+1YEAR");
         solrQuery.setFacetMinCount(1);
 
@@ -360,8 +360,8 @@ public class SpecimenService implements SpecimenDefinition {
                 numberMax,
                 pagesCount,
                 response.getFacetField(MUTATION_ID_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
-                response.getFacetField(PUBLICATION_MARK_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
-                response.getFacetField(PUBLICATION_ID_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
+                response.getFacetField(MUTATION_MARK_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
+                response.getFacetField(EDITION_ID_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
                 response.getFacetField(DAMAGE_TYPES_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
                 publicationDateList,
                 specimens

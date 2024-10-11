@@ -127,9 +127,9 @@
     <field name="note" type="string" indexed="false" stored="true" required="true" multiValued="false" />
     <field name="name" type="string" indexed="true" stored="true" required="true" multiValued="false" />
     <field name="subName" type="string" indexed="true" stored="true" required="true" multiValued="false" />
-    <field name="publicationId" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+    <field name="editionId" type="string" indexed="true" stored="true" required="true" multiValued="false" />
     <field name="mutationId" type="string" indexed="true" stored="true" required="true" multiValued="false" />
-    <field name="publicationMark" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+    <field name="mutationMark" type="string" indexed="true" stored="true" required="true" multiValued="false" />
     <!-- TODO: publicationDate must be required! But need to delete some records which doesnt have it filled up -->
     <field name="publicationDate" type="rdate" indexed="true" stored="true" required="false" multiValued="false" />
     <field name="publicationDateString" type="string" indexed="true" stored="true" required="true" multiValued="false" />

@@ -17,7 +17,7 @@ public record VolumeDTO(
         String signature,
         String ownerId,
         Integer year,
-        String publicationMark,
+        String mutationMark,
         String created,
         String createdBy,
         String updated,
