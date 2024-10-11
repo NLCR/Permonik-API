@@ -15,9 +15,9 @@ public interface SpecimenDefinition {
     String NOTE_FIELD = "note";
     String NAME_FIELD = "name";
     String SUB_NAME_FIELD = "subName";
-    String PUBLICATION_ID_FIELD = "publicationId";
+    String EDITION_ID_FIELD = "editionId";
     String MUTATION_ID_FIELD = "mutationId";
-    String PUBLICATION_MARK_FIELD = "publicationMark";
+    String MUTATION_MARK_FIELD = "mutationMark";
     String PUBLICATION_DATE_FIELD = "publicationDate";
     String PUBLICATION_DATE_STRING_FIELD = "publicationDateString";
     String NUMBER_FIELD = "number";

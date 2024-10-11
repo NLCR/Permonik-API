@@ -17,5 +17,5 @@ public interface VolumeDefinition {
     String SIGNATURE_FIELD = "signature";
     String OWNER_ID_FIELD = "ownerId";
     String YEAR_FIELD = "year";
-    String PUBLICATION_MARK_FIELD = "publicationMark";
+    String MUTATION_MARK_FIELD = "mutationMark";
 }

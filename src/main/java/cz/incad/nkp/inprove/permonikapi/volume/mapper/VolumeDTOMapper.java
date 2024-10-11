@@ -40,7 +40,7 @@ public class VolumeDTOMapper implements Function<Volume, VolumeDTO> {
                     volume.getSignature(),
                     volume.getOwnerId(),
                     volume.getYear(),
-                    volume.getPublicationMark(),
+                    volume.getMutationMark(),
                     volume.getCreated(),
                     volume.getCreatedBy(),
                     volume.getUpdated(),

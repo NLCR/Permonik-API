@@ -21,8 +21,8 @@ public class SpecimenFacets implements SpecimenDefinition {
     private List<String> names;
     private List<String> subNames;
     private List<String> mutationIds;
-    private List<String> publicationIds;
-    private List<String> publicationMarks;
+    private List<String> editionIds;
+    private List<String> mutationMarks;
     private List<String> ownerIds;
     private List<String> damageTypes;
     private String barCode;
@@ -51,12 +51,12 @@ public class SpecimenFacets implements SpecimenDefinition {
         return doUUIDListCollection(this.mutationIds, MUTATION_ID_FIELD);
     }
 
-    String getPublicationsQueryString() {
-        return doUUIDListCollection(this.publicationIds, PUBLICATION_ID_FIELD);
+    String getEditionsQueryString() {
+        return doUUIDListCollection(this.editionIds, EDITION_ID_FIELD);
     }
 
-    String getPublicationMarkQueryString() {
-        return doTextListCollection(this.publicationMarks, PUBLICATION_MARK_FIELD);
+    String getMutationMarkQueryString() {
+        return doTextListCollection(this.mutationMarks, MUTATION_MARK_FIELD);
     }
 
     String getOwnersQueryString() {

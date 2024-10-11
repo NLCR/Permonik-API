@@ -124,8 +124,8 @@ public class VolumeService implements VolumeDefinition {
                 specimensForVolumeOverview.numberMax(),
                 specimensForVolumeOverview.pagesCount(),
                 specimensForVolumeOverview.mutationIds(),
-                specimensForVolumeOverview.publicationMark(),
-                specimensForVolumeOverview.publicationIds(),
+                specimensForVolumeOverview.mutationMarks(),
+                specimensForVolumeOverview.editionIds(),
                 specimensForVolumeOverview.damageTypes(),
                 specimensForVolumeOverview.publicationDayRanges(),
                 specimensForVolumeOverview.specimens()

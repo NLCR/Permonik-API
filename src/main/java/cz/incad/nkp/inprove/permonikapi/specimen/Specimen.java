@@ -41,11 +41,11 @@ public class Specimen extends Auditable {
     @Field
     private String subName;
     @Field
-    private String publicationId; // UUID of publication
+    private String editionId; // UUID of edition
     @Field
     private String mutationId; // UUID of mutation
     @Field
-    private String publicationMark;
+    private String mutationMark;
     @Field
     private String publicationDate;
     @Field

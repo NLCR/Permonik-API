@@ -1,8 +1,8 @@
-package cz.incad.nkp.inprove.permonikapi.publication.mapper;
+package cz.incad.nkp.inprove.permonikapi.edition.mapper;
 
 
-import cz.incad.nkp.inprove.permonikapi.publication.Publication;
-import cz.incad.nkp.inprove.permonikapi.publication.dto.CreatablePublicationDTO;
+import cz.incad.nkp.inprove.permonikapi.edition.Edition;
+import cz.incad.nkp.inprove.permonikapi.edition.dto.CreatableEditionDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -10,7 +10,7 @@ import org.mapstruct.MappingTarget;
 import java.util.UUID;
 
 @Mapper(componentModel = "spring")
-public interface CreatablePublicationMapper {
+public interface CreatableEditionMapper {
 
     default String generateUUID() {
         return UUID.randomUUID().toString();
@@ -20,5 +20,5 @@ public interface CreatablePublicationMapper {
     @Mapping(target = "isDefault", defaultValue = "false")
     @Mapping(target = "isAttachment", defaultValue = "false")
     @Mapping(target = "isPeriodicAttachment", defaultValue = "false")
-    void createPublication(CreatablePublicationDTO creatablePublicationDTO, @MappingTarget Publication target);
+    void createEdition(CreatableEditionDTO creatableEditionDTO, @MappingTarget Edition target);
 }

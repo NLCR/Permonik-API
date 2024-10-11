@@ -30,7 +30,7 @@ public class Volume extends Auditable {
     {
       "day": "Monday",
       "numExists": true,
-      "publicationId": "fd041788-b3c3-4fe9-b824-899aaad62ca3",
+      "editionId": "fd041788-b3c3-4fe9-b824-899aaad62ca3",
       "pagesCount": 0,
       "name": "Mladá fronta (TESTOVACÍ DATA)",
       "subName": "",
@@ -54,7 +54,7 @@ public class Volume extends Auditable {
     @Field
     private Integer year;
     @Field
-    private String publicationMark;
+    private String mutationMark;
 //
 //    @Field
 //    private LocalDateTime created;

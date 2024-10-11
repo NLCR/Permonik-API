@@ -124,7 +124,7 @@
     <field name="signature" type="string" indexed="false" stored="true" required="true" multiValued="false" />
     <field name="ownerId" type="string" indexed="false" stored="true" required="true" multiValued="false" />
     <field name="year" type="pint" indexed="true" stored="true" required="true" multiValued="false" />
-    <field name="publicationMark" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+    <field name="mutationMark" type="string" indexed="true" stored="true" required="true" multiValued="false" />
     <field name="created" type="rdate" indexed="true" stored="true" required="true" multiValued="false" />
     <field name="createdBy" type="string" indexed="true" stored="true" required="true" multiValued="false" />
     <field name="updated" type="rdate" indexed="true" stored="true" required="false" multiValued="false" />
