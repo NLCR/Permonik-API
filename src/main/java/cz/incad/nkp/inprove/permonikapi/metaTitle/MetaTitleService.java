@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static cz.incad.nkp.inprove.permonikapi.audit.AuditableDefinition.DELETED_FIELD;
+import static cz.incad.nkp.inprove.permonikapi.config.security.user.UserProducer.getCurrentUser;
 
 @Service
 public class MetaTitleService implements MetaTitleDefinition {
@@ -69,7 +70,7 @@ public class MetaTitleService implements MetaTitleDefinition {
     }
 
     public List<MetaTitleOverviewDTO> getMetaTitleOverview() throws SolrServerException, IOException {
-        List<MetaTitle> metaTitles = getAllPublicMetaTitles();
+        List<MetaTitle> metaTitles = getCurrentUser() != null ? getMetaTitles() : getAllPublicMetaTitles();
         return metaTitles
                 .stream()
                 .map(metaTitle -> {
