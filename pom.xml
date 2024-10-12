@@ -31,7 +31,7 @@
         <solrj.version>9.6.1</solrj.version>
         <mapstruct.version>1.6.2</mapstruct.version>
         <slf4j.version>2.0.16</slf4j.version>
-        <logback.version>1.5.8</logback.version>
+        <logback.version>1.5.10</logback.version>
         <typescript-generator.version>3.2.1263</typescript-generator.version>
         <hibernate.version>6.2.32.Final</hibernate.version>
     </properties>
