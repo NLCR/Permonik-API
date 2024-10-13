@@ -12,8 +12,6 @@ public record VolumeOverviewStatsDTO(
         String barCode,
         Object publicationDayMin,
         Object publicationDayMax,
-        Object numberMin,
-        Object numberMax,
         Object pagesCount,
         List<FacetFieldDTO> mutationIds,
         List<FacetFieldDTO> mutationMarks,
