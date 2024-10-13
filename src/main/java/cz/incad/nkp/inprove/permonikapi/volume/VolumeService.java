@@ -120,8 +120,6 @@ public class VolumeService implements VolumeDefinition {
                 volumeDTO.barCode(),
                 specimensForVolumeOverview.publicationDayMin(),
                 specimensForVolumeOverview.publicationDayMax(),
-                specimensForVolumeOverview.numberMin(),
-                specimensForVolumeOverview.numberMax(),
                 specimensForVolumeOverview.pagesCount(),
                 specimensForVolumeOverview.mutationIds(),
                 specimensForVolumeOverview.mutationMarks(),

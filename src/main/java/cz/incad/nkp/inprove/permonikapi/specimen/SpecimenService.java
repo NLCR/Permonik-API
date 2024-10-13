@@ -316,7 +316,7 @@ public class SpecimenService implements SpecimenDefinition {
         solrQuery.addFilterQuery(NUM_EXISTS_FIELD + ":true");
         solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
         solrQuery.setParam(StatsParams.STATS, true);
-        solrQuery.setParam(StatsParams.STATS_FIELD, NUMBER_FIELD, PUBLICATION_DATE_STRING_FIELD, PAGES_COUNT_FIELD);
+        solrQuery.setParam(StatsParams.STATS_FIELD, PUBLICATION_DATE_STRING_FIELD, PAGES_COUNT_FIELD);
         solrQuery.setRows(0);
         solrQuery.setFacet(true);
         solrQuery.addFacetField(MUTATION_ID_FIELD, MUTATION_MARK_FIELD, EDITION_ID_FIELD, DAMAGE_TYPES_FIELD);
@@ -329,8 +329,6 @@ public class SpecimenService implements SpecimenDefinition {
 
         Object publicationDayMin = statsInfo.get(PUBLICATION_DATE_STRING_FIELD).getMin();
         Object publicationDayMax = statsInfo.get(PUBLICATION_DATE_STRING_FIELD).getMax();
-        Object numberMin = statsInfo.get(NUMBER_FIELD).getMin();
-        Object numberMax = statsInfo.get(NUMBER_FIELD).getMax();
         Object pagesCount = statsInfo.get(PAGES_COUNT_FIELD).getSum();
 
         SolrQuery solrQuery2 = new SolrQuery("*:*");
@@ -356,8 +354,6 @@ public class SpecimenService implements SpecimenDefinition {
         return new SpecimensForVolumeOverviewStatsDTO(
                 publicationDayMin,
                 publicationDayMax,
-                numberMin,
-                numberMax,
                 pagesCount,
                 response.getFacetField(MUTATION_ID_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
                 response.getFacetField(MUTATION_MARK_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
