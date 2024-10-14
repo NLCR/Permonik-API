@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static cz.incad.nkp.inprove.permonikapi.audit.AuditableDefinition.DELETED_FIELD;
+import static cz.incad.nkp.inprove.permonikapi.utils.DateValidator.isValidDate;
 
 @Service
 public class SpecimenService implements SpecimenDefinition {
@@ -70,6 +71,8 @@ public class SpecimenService implements SpecimenDefinition {
 
     public SearchedSpecimensDTO getSearchedSpecimens(String metaTitleId, Integer offset, Integer rows, String facets, String view) throws IOException, SolrServerException {
 
+        Integer localRows = rows;
+
         ObjectMapper objectMapper = new ObjectMapper();
         SpecimenFacets specimenFacets = objectMapper.readValue(facets, SpecimenFacets.class);
 
@@ -117,15 +120,20 @@ public class SpecimenService implements SpecimenDefinition {
         }
 
         if (Objects.equals(view, "calendar") && specimenFacets.getCalendarDateStart() != null && !specimenFacets.getCalendarDateStart().isEmpty()) {
-            solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[" + specimenFacets.getCalendarDateStart() + " TO *]");
-            solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[* TO " + specimenFacets.getCalendarDateEnd() + "]");
+            if (isValidDate(specimenFacets.getCalendarDateStart())) {
+                solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[" + specimenFacets.getCalendarDateStart() + " TO *]");
+                solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[* TO " + specimenFacets.getCalendarDateEnd() + "]");
+            } else {
+                //preventing return of 1000 rows in calendar when calendar date isn't initialized correctly
+                localRows = 0;
+            }
         }
 
         // copy query this way, because we need same filters
         SolrQuery groupQuery;
         groupQuery = solrQuery;
 
-        solrQuery.setRows(rows);
+        solrQuery.setRows(localRows);
         solrQuery.setStart(offset);
         solrQuery.setSort(PUBLICATION_DATE_STRING_FIELD, SolrQuery.ORDER.asc);
         // TODO: join is not working, it always returns unknown field volumeId
