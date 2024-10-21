@@ -24,6 +24,8 @@ public class Volume extends Auditable {
     @Field
     private String metaTitleId; // UUID of metaTitle
     @Field
+    private String subName;
+    @Field
     private String mutationId; // UUID of mutation
     /*
     periodicity as string

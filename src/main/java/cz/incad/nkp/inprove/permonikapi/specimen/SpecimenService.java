@@ -255,9 +255,12 @@ public class SpecimenService implements SpecimenDefinition {
 
     }
 
+    public List<Specimen> getSpecimensForVolumeDetail(String volumeId, Boolean onlyPublic) throws SolrServerException, IOException {
+        return getSpecimensForVolumeDetail(volumeId, onlyPublic, false);
+    }
 
     //    public List<Specimen> getSpecimensForVolumeDetail(String volumeId, String dateFrom, String dateTo) throws SolrServerException, IOException {
-    public List<Specimen> getSpecimensForVolumeDetail(String volumeId, Boolean onlyPublic) throws SolrServerException, IOException {
+    public List<Specimen> getSpecimensForVolumeDetail(String volumeId, Boolean onlyPublic, Boolean showAttachmentsAtTheEnd) throws SolrServerException, IOException {
 
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.addFilterQuery(VOLUME_ID_FIELD + ":\"" + volumeId + "\"");
@@ -267,6 +270,9 @@ public class SpecimenService implements SpecimenDefinition {
         solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
 //        solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[" + dateFrom + " TO " + dateTo + "]");
         solrQuery.setSort(PUBLICATION_DATE_STRING_FIELD, SolrQuery.ORDER.asc);
+        if (showAttachmentsAtTheEnd) {
+            solrQuery.setSort(IS_ATTACHMENT_FIELD, SolrQuery.ORDER.asc);
+        }
 //        solrQuery.setParam(StatsParams.STATS, true);
 //        solrQuery.setParam(StatsParams.STATS_FIELD, PUBLICATION_DATE_STRING_FIELD);
         solrQuery.setRows(100000);

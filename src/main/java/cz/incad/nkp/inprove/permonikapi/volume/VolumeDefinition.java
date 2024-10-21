@@ -7,6 +7,7 @@ public interface VolumeDefinition {
     String DATE_FROM_FIELD = "dateFrom";
     String DATE_TO_FIELD = "dateTo";
     String META_TITLE_ID_FIELD = "metaTitleId";
+    String SUB_NAME_FIELD = "subName";
     String MUTATION_ID_FIELD = "mutationId";
     String PERIODICITY_FIELD = "periodicity";
     String FIRST_NUMBER_FIELD = "firstNumber";

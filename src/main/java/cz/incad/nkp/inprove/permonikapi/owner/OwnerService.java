@@ -72,7 +72,7 @@ public class OwnerService implements OwnerDefinition {
 
     public void createOwner(CreatableOwnerDTO owner) throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery("*:*");
-        solrQuery.addFilterQuery(NAME_FIELD + ":\"" + owner.name() + "\"");
+        solrQuery.addFilterQuery(SHORTHAND_FIELD + ":\"" + owner.shorthand() + "\"");
         solrQuery.setRows(1);
 
         QueryResponse response = solrClient.query(OWNER_CORE_NAME, solrQuery);
@@ -80,7 +80,7 @@ public class OwnerService implements OwnerDefinition {
         List<Owner> ownerList = response.getBeans(Owner.class);
 
         if (!ownerList.isEmpty()) {
-            throw new RuntimeException("Owner with this name already exists");
+            throw new RuntimeException("Owner with this shorthand already exists");
         }
 
         Owner newOwner = new Owner();

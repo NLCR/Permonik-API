@@ -209,11 +209,11 @@ def create_initial_data():
 
     # Vlastníci
     owners = [
-        {"id": generate_uuid(), "name": "NKP", "sigla": "ABA001", "created": current_time, "createdBy": ""},
-        {"id": generate_uuid(), "name": "MZK", "sigla": "BOA001", "created": current_time, "createdBy": ""},
-        {"id": generate_uuid(), "name": "VKOL", "sigla": "OLA001", "created": current_time, "createdBy": ""},
-        {"id": generate_uuid(), "name": "KUK", "sigla": "ULG001", "created": current_time, "createdBy": ""},
-        {"id": generate_uuid(), "name": "PaKK", "sigla": "PAG001", "created": current_time, "createdBy": ""}
+        {"id": generate_uuid(), "name": "Národní knihovna České republiky", "shorthand": "NKP", "sigla": "ABA001", "created": current_time, "createdBy": ""},
+        {"id": generate_uuid(), "name": "Moravská zemská knihovna v Brně", "shorthand": "MZK", "sigla": "BOA001", "created": current_time, "createdBy": ""},
+        {"id": generate_uuid(), "name": "Vědecká knihovna v Olomouci", "shorthand": "VKOL", "sigla": "OLA001", "created": current_time, "createdBy": ""},
+        {"id": generate_uuid(), "name": "Knihovna Ústeckého kraje, příspěvková organizace", "shorthand": "KUK", "sigla": "ULG001", "created": current_time, "createdBy": ""},
+        {"id": generate_uuid(), "name": "Krajská knihovna v Pardubicích", "shorthand": "PaKK", "sigla": "PAG001", "created": current_time, "createdBy": ""}
     ]
     new_solr_owners.add(owners)
 
@@ -291,6 +291,7 @@ def migrate_volume(meta_title_mapping, mutations_mapping, owners_mapping, editio
             "dateTo": vol.get("datum_do").strip(),
             "metaTitleId": meta_title_mapping.get(vol.get("id_titul").strip(), ""),
             "mutationId": mutations_mapping.get(vol.get("mutace").strip()),
+            "subName": "",
             "periodicity": transform_periodicity(vol.get("periodicita").strip(), editions_mapping),
             "firstNumber": vol.get("prvni_cislo").strip(),
             "lastNumber": vol.get("posledni_cislo").strip(),

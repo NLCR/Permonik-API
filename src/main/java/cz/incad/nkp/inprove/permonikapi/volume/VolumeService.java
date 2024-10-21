@@ -82,7 +82,7 @@ public class VolumeService implements VolumeDefinition {
         VolumeDTO volumeDTO = optVolume.get();
 
         try {
-            List<Specimen> specimenList = specimenService.getSpecimensForVolumeDetail(volumeDTO.id(), onlyPublic);
+            List<Specimen> specimenList = specimenService.getSpecimensForVolumeDetail(volumeDTO.id(), onlyPublic, volumeDTO.showAttachmentsAtTheEnd());
 
             return new VolumeDetailDTO(
                     volumeDTO,

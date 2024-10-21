@@ -31,6 +31,7 @@ public class VolumeDTOMapper implements Function<Volume, VolumeDTO> {
                     volume.getDateFrom(),
                     volume.getDateTo(),
                     volume.getMetaTitleId(),
+                    volume.getSubName(),
                     volume.getMutationId(),
                     getPeriodicity(volume.getPeriodicity()),
                     volume.getFirstNumber(),
