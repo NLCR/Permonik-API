@@ -115,6 +115,7 @@
     <field name="dateFrom" type="rdate" indexed="true" stored="true" required="true" multiValued="false" />
     <field name="dateTo" type="rdate" indexed="true" stored="true" required="true" multiValued="false" />
     <field name="metaTitleId" type="string" indexed="false" stored="true" required="true" multiValued="false" />
+    <field name="subName" type="string" indexed="false" stored="true" required="true" multiValued="false" />
     <field name="mutationId" type="string" indexed="true" stored="true" required="true" multiValued="false" />
     <field name="periodicity" type="json" indexed="false" stored="true" required="true" multiValued="false" />
     <field name="firstNumber" type="pint" indexed="false" stored="true" required="true" multiValued="false" />

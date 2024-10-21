@@ -112,6 +112,7 @@
 
     <field name="id" type="uuid" indexed="true" stored="true" required="true" multiValued="false" />
     <field name="name" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+    <field name="shorthand" type="string" indexed="true" stored="true" required="true" multiValued="false" />
     <field name="sigla" type="string" indexed="true" stored="true" required="true" multiValued="false" />
     <field name="created" type="rdate" indexed="true" stored="true" required="true" multiValued="false" />
     <field name="createdBy" type="string" indexed="true" stored="true" required="true" multiValued="false" />

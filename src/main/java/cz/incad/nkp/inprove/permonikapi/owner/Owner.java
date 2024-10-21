@@ -20,5 +20,8 @@ public class Owner extends Auditable {
     private String name;
 
     @Field
+    private String shorthand;
+
+    @Field
     private String sigla;
 }
