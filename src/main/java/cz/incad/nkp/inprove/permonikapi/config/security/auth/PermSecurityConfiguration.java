@@ -1,6 +1,5 @@
 package cz.incad.nkp.inprove.permonikapi.config.security.auth;
 
-import cz.incad.nkp.inprove.permonikapi.config.ProfileManager;
 import cz.incad.nkp.inprove.permonikapi.config.security.user.UserDetailsServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -25,53 +24,53 @@ public class PermSecurityConfiguration {
 
     private UserDetailsServiceImpl userDetailsService;
     private PasswordEncoder passwordEncoder;
-    private ProfileManager profileManager;
+//    private ProfileManager profileManager;
 
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        if (profileManager.isDevelopment()) {
-            http.authorizeHttpRequests((authz) -> authz.anyRequest().permitAll())
-                    .csrf(AbstractHttpConfigurer::disable);
-        } else {
-            http
-                    .authorizeHttpRequests((authz) -> authz
-                            .requestMatchers("swagger-ui/**").permitAll()
-                            .requestMatchers("v3/api-docs/**").permitAll()
-                            .requestMatchers("swagger-resources/**").permitAll()
-                            .requestMatchers("swagger-resources").permitAll()
-                            .requestMatchers("api/auth/login/shibboleth").permitAll()
-                            .requestMatchers("api/auth/login/basic").permitAll()
-                            .requestMatchers("api/auth/logout").permitAll()
-                            .requestMatchers(HttpMethod.GET, "api/me").permitAll()
-                            .requestMatchers(HttpMethod.GET, "api/metatitle/**").permitAll()
-                            .requestMatchers(HttpMethod.PUT, "api/metatitle/**").authenticated()
-                            .requestMatchers(HttpMethod.POST, "api/metatitle/**").authenticated()
-                            .requestMatchers(HttpMethod.GET, "api/mutation/**").permitAll()
-                            .requestMatchers(HttpMethod.PUT, "api/mutation/**").authenticated()
-                            .requestMatchers(HttpMethod.POST, "api/mutation/**").authenticated()
-                            .requestMatchers(HttpMethod.GET, "api/owner/**").permitAll()
-                            .requestMatchers(HttpMethod.PUT, "api/owner/**").authenticated()
-                            .requestMatchers(HttpMethod.POST, "api/owner/**").authenticated()
-                            .requestMatchers(HttpMethod.GET, "api/edition/**").permitAll()
-                            .requestMatchers(HttpMethod.PUT, "api/edition/**").authenticated()
-                            .requestMatchers(HttpMethod.POST, "api/edition/**").authenticated()
-                            .requestMatchers(HttpMethod.GET, "api/specimen/**").permitAll()
-                            .requestMatchers(HttpMethod.POST, "api/specimen/**").permitAll()
-                            .requestMatchers("api/user/**").authenticated()
-                            .requestMatchers(HttpMethod.GET, "api/volume/**").permitAll()
-                            .requestMatchers(HttpMethod.PUT, "api/volume/**").authenticated()
-                            .requestMatchers(HttpMethod.POST, "api/volume/**").authenticated()
-                            .requestMatchers(HttpMethod.DELETE, "api/volume/**").authenticated()
-                            .requestMatchers("/error").permitAll()
-                            .anyRequest().denyAll()
-                    )
-                    .csrf(AbstractHttpConfigurer::disable)
-                    .httpBasic(AbstractHttpConfigurer::disable)
-                    .formLogin(AbstractHttpConfigurer::disable)
-                    .logout(AbstractHttpConfigurer::disable)
-                    .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
-        }
+//        if (profileManager.isDevelopment()) {
+//            http.authorizeHttpRequests((authz) -> authz.anyRequest().permitAll())
+//                    .csrf(AbstractHttpConfigurer::disable);
+//        } else {
+        http
+                .authorizeHttpRequests((authz) -> authz
+                        .requestMatchers("swagger-ui/**").permitAll()
+                        .requestMatchers("v3/api-docs/**").permitAll()
+                        .requestMatchers("swagger-resources/**").permitAll()
+                        .requestMatchers("swagger-resources").permitAll()
+                        .requestMatchers("api/auth/login/shibboleth").permitAll()
+                        .requestMatchers("api/auth/login/basic").permitAll()
+                        .requestMatchers("api/auth/logout").permitAll()
+                        .requestMatchers(HttpMethod.GET, "api/me").permitAll()
+                        .requestMatchers(HttpMethod.GET, "api/metatitle/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "api/metatitle/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "api/metatitle/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "api/mutation/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "api/mutation/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "api/mutation/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "api/owner/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "api/owner/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "api/owner/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "api/edition/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "api/edition/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "api/edition/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "api/specimen/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "api/specimen/**").permitAll()
+                        .requestMatchers("api/user/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "api/volume/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "api/volume/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "api/volume/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "api/volume/**").authenticated()
+                        .requestMatchers("/error").permitAll()
+                        .anyRequest().denyAll()
+                )
+                .csrf(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .logout(AbstractHttpConfigurer::disable)
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
+//        }
 
 
         return http.build();

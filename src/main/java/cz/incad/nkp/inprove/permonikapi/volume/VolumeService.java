@@ -178,7 +178,7 @@ public class VolumeService implements VolumeDefinition {
         List<Volume> volumeList = response.getBeans(Volume.class);
 
         if (!volumeList.isEmpty()) {
-            throw new RuntimeException("Volume with barcode" + editableVolumeWithSpecimensDTO.volume().getBarCode() + "already exists");
+            throw new RuntimeException("Volume with barcode " + editableVolumeWithSpecimensDTO.volume().getBarCode() + " already exists");
         }
 
         this.createVolume(editableVolumeWithSpecimensDTO.volume());
