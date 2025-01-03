@@ -181,7 +181,7 @@ public class VolumeService implements VolumeDefinition {
             throw new RuntimeException("Volume with barcode " + editableVolumeWithSpecimensDTO.volume().getBarCode() + " already exists");
         }
 
-        this.createVolume(editableVolumeWithSpecimensDTO.volume());
+        createVolume(editableVolumeWithSpecimensDTO.volume());
 
         specimenService.createSpecimens(editableVolumeWithSpecimensDTO.specimens());
 
@@ -195,7 +195,7 @@ public class VolumeService implements VolumeDefinition {
             throw new RuntimeException("Volume " + volumeId + " not found");
         }
 
-        this.updateVolume(editableVolumeWithSpecimensDTO.volume());
+        updateVolume(editableVolumeWithSpecimensDTO.volume());
 
         specimenService.updateSpecimens(editableVolumeWithSpecimensDTO.specimens());
 
@@ -213,11 +213,11 @@ public class VolumeService implements VolumeDefinition {
         List<Specimen> specimens = specimenService.getSpecimensForVolumeDetail(volumeId, false);
         specimenService.deleteSpecimens(specimens);
 
-        this.deleteVolume(volume);
+        deleteVolume(volume);
 
     }
 
-    public void updateRegeneratedVolumeWithSpecimens(String volumeId, EditableVolumeWithSpecimensDTO editableVolumeWithSpecimensDTO) throws SolrServerException, IOException {
+    public void updateOvergeneratedVolumeWithSpecimens(String volumeId, EditableVolumeWithSpecimensDTO editableVolumeWithSpecimensDTO) throws SolrServerException, IOException {
         if (getVolumeDTOById(volumeId).isEmpty()) {
             throw new RuntimeException("Volume " + volumeId + " not found");
         }
@@ -226,7 +226,7 @@ public class VolumeService implements VolumeDefinition {
         List<Specimen> oldSpecimens = specimenService.getSpecimensForVolumeDetail(volumeId, false);
         specimenService.deleteSpecimens(oldSpecimens);
 
-        this.updateVolume(editableVolumeWithSpecimensDTO.volume());
+        updateVolume(editableVolumeWithSpecimensDTO.volume());
 
         specimenService.createSpecimens(editableVolumeWithSpecimensDTO.specimens());
 

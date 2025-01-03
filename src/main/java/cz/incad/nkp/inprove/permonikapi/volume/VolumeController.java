@@ -41,10 +41,10 @@ public class VolumeController {
         volumeService.deleteVolumeWithSpecimens(id);
     }
 
-    @Operation(summary = "Updates existing volume with regenerated specimens")
-    @PutMapping("/{id}/regenerated")
-    public void updateRegeneratedVolumeWithSpecimens(@PathVariable String id, @RequestBody EditableVolumeWithSpecimensDTO editableVolumeWithSpecimensDTO) throws SolrServerException, IOException {
-        volumeService.updateRegeneratedVolumeWithSpecimens(id, editableVolumeWithSpecimensDTO);
+    @Operation(summary = "Updates existing volume with overgenerated specimens")
+    @PutMapping("/{id}/overgenerated")
+    public void updateOvergeneratedVolumeWithSpecimens(@PathVariable String id, @RequestBody EditableVolumeWithSpecimensDTO editableVolumeWithSpecimensDTO) throws SolrServerException, IOException {
+        volumeService.updateOvergeneratedVolumeWithSpecimens(id, editableVolumeWithSpecimensDTO);
     }
 
 

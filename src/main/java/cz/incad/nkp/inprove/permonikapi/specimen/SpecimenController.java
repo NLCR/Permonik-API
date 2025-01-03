@@ -58,5 +58,11 @@ public class SpecimenController {
         return specimenService.getSpecimenNamesAndSubNames();
     }
 
+    @Operation(summary = "Deletes existing specimen by id")
+    @DeleteMapping("{id}")
+    public void deleteSpecimenById(@PathVariable String id) throws SolrServerException, IOException {
+        specimenService.deleteSpecimenById(id);
+    }
+
 
 }

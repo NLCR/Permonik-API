@@ -57,6 +57,7 @@ public class PermSecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "api/edition/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "api/specimen/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "api/specimen/**").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "api/specimen/**").authenticated()
                         .requestMatchers("api/user/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "api/volume/**").permitAll()
                         .requestMatchers(HttpMethod.PUT, "api/volume/**").authenticated()

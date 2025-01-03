@@ -412,7 +412,16 @@ public class SpecimenService implements SpecimenDefinition {
 
     public void updateSpecimens(List<Specimen> specimens) {
         try {
-            List<Specimen> specimenList = specimens.stream().peek(Specimen::preUpdate).toList();
+            List<Specimen> specimenList = specimens.stream()
+                    .peek(specimen -> {
+                        // If the specimen was duplicated on FE, we will call only prePersist and skip preUpdate
+                        if (specimen.getCreated() == null) {
+                            specimen.prePersist();
+                        } else {
+                            specimen.preUpdate();
+                        }
+                    })
+                    .toList();
 
             solrClient.addBeans(SPECIMEN_CORE_NAME, specimenList);
             solrClient.commit(SPECIMEN_CORE_NAME);
@@ -431,6 +440,41 @@ public class SpecimenService implements SpecimenDefinition {
             logger.info("specimens successfully deleted");
         } catch (Exception e) {
             throw new RuntimeException("Failed to delete specimens", e);
+        }
+    }
+
+    public Optional<Specimen> getSpecimenById(String specimenId) throws SolrServerException, IOException {
+        SolrQuery solrQuery = new SolrQuery("*:*");
+        solrQuery.addFilterQuery(ID_FIELD + ":\"" + specimenId + "\"");
+        solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
+        solrQuery.setRows(1);
+
+        QueryResponse response = solrClient.query(SPECIMEN_CORE_NAME, solrQuery);
+
+        List<Specimen> specimenList = response.getBeans(Specimen.class);
+
+        return specimenList.isEmpty() ? Optional.empty() : Optional.of(specimenList.get(0));
+    }
+
+    public void deleteSpecimenById(String id) throws SolrServerException, IOException {
+
+        Optional<Specimen> specimenOpt = getSpecimenById(id);
+
+        if (specimenOpt.isEmpty()) {
+            throw new RuntimeException("Specimen " + id + " not found");
+        }
+
+        Specimen specimen = specimenOpt.get();
+
+
+        try {
+            specimen.preRemove();
+
+            solrClient.addBean(SPECIMEN_CORE_NAME, specimen);
+            solrClient.commit(SPECIMEN_CORE_NAME);
+            logger.info("specimen successfully deleted");
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete specimen", e);
         }
     }
 
