@@ -60,7 +60,7 @@ public class SpecimenService implements SpecimenDefinition {
         Long ownersCount = ownersStats.getCountDistinct();
 
         GroupResponse groupResponse = response.getGroupResponse();
-        GroupCommand groupCommand = groupResponse.getValues().get(0);
+        GroupCommand groupCommand = groupResponse.getValues().getFirst();
         Integer matchedSpecimens = groupCommand.getMatches();
 
 
@@ -115,16 +115,18 @@ public class SpecimenService implements SpecimenDefinition {
 
         // Add filtering based on year interval
         if (specimenFacets.getDateStart() > 0 && specimenFacets.getDateEnd() > 0 && Objects.equals(view, "table")) {
-            solrQuery.addFilterQuery(PUBLICATION_DATE_STRING_FIELD + ":[" + specimenFacets.getDateStart() + "0101 TO *]");
-            solrQuery.addFilterQuery(PUBLICATION_DATE_STRING_FIELD + ":[* TO " + specimenFacets.getDateEnd() + "1231]");
+            // getDateStart -> format: 2024 -> [2024-01-01 TO *]
+            solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[" + specimenFacets.getDateStart() + "-01-01 TO *]");
+            solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[* TO " + specimenFacets.getDateEnd() + "-12-31]");
         }
 
         if (Objects.equals(view, "calendar") && specimenFacets.getCalendarDateStart() != null && !specimenFacets.getCalendarDateStart().isEmpty()) {
             if (isValidDate(specimenFacets.getCalendarDateStart())) {
+                // getCalendarDateStart -> format: 1953-01-01T00:00:00.000Z -> [1953-01-01T00:00:00.000Z TO *]
                 solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[" + specimenFacets.getCalendarDateStart() + " TO *]");
                 solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[* TO " + specimenFacets.getCalendarDateEnd() + "]");
             } else {
-                //preventing return of 1000 rows in calendar when calendar date isn't initialized correctly
+                //preventing return of 1000 rows in calendar when calendar date isn't initialized yet
                 localRows = 0;
             }
         }
@@ -138,7 +140,7 @@ public class SpecimenService implements SpecimenDefinition {
         solrQuery.setSort(PUBLICATION_DATE_STRING_FIELD, SolrQuery.ORDER.asc);
         // TODO: join is not working, it always returns unknown field volumeId
 //        solrQuery.add("join", "{!join from=volumeId to=id fromIndex=volume}barCode:barCode");
-        // TODO this will be sorting based on UUID, that's wrong
+        // TODO: this will be sorting based on UUID, that's wrong
         solrQuery.addSort(EDITION_ID_FIELD, SolrQuery.ORDER.desc);
 //        solrQuery.addSort(MUTATION_ID_FIELD, SolrQuery.ORDER.asc);
 
@@ -172,7 +174,7 @@ public class SpecimenService implements SpecimenDefinition {
 
         GroupResponse groupResponse = solrClient.query(SPECIMEN_CORE_NAME, solrQuery).getGroupResponse();
 
-        GroupCommand groupCommand = groupResponse.getValues().get(0);
+        GroupCommand groupCommand = groupResponse.getValues().getFirst();
         Integer groupedSpecimens = groupCommand.getMatches();
 
         return new SearchedSpecimensDTO(
@@ -237,8 +239,9 @@ public class SpecimenService implements SpecimenDefinition {
 
         // Add filtering based on year interval for table view
         if (specimenFacets.getDateStart() > 0 && specimenFacets.getDateEnd() > 0 && Objects.equals(view, "table")) {
-            solrQuery.addFilterQuery(PUBLICATION_DATE_STRING_FIELD + ":[" + specimenFacets.getDateStart() + "0101 TO *]");
-            solrQuery.addFilterQuery(PUBLICATION_DATE_STRING_FIELD + ":[* TO " + specimenFacets.getDateEnd() + "1231]");
+            // getDateStart -> format: 2024 -> [2024-01-01 TO *]
+            solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[" + specimenFacets.getDateStart() + "-01-01 TO *]");
+            solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[* TO " + specimenFacets.getDateEnd() + "-12-31]");
         }
 
         QueryResponse response = solrClient.query(SPECIMEN_CORE_NAME, solrQuery);
@@ -354,15 +357,15 @@ public class SpecimenService implements SpecimenDefinition {
         QueryResponse response2 = solrClient.query(SPECIMEN_CORE_NAME, solrQuery2);
         List<Specimen> specimens = response2.getBeans(Specimen.class);
 
-
-        List<RangeFacet.Count> rangeFacetCounts = response.getFacetRanges().stream()
-                .filter(rangeFacet -> rangeFacet.getName().equals(PUBLICATION_DATE_FIELD))
+        List<FacetFieldDTO> publicationDateList = response.getFacetRanges().stream()
+                .filter(rangeFacet -> PUBLICATION_DATE_FIELD.equals(rangeFacet.getName()))
                 .findFirst()
-                .map(RangeFacet::getCounts)
-                .orElse(null);
-
-        List<FacetFieldDTO> publicationDateList = rangeFacetCounts.stream()
-                .map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getValue(), (long) facetFieldEntry.getCount()))
+                .map(rangeFacet -> (List<RangeFacet.Count>) rangeFacet.getCounts())
+                .stream()
+                .flatMap(counts -> counts.stream()
+                        .map(count -> new FacetFieldDTO(
+                                count.getValue(),
+                                (long) count.getCount())))
                 .toList();
 
         return new SpecimensForVolumeOverviewStatsDTO(
@@ -453,7 +456,7 @@ public class SpecimenService implements SpecimenDefinition {
 
         List<Specimen> specimenList = response.getBeans(Specimen.class);
 
-        return specimenList.isEmpty() ? Optional.empty() : Optional.of(specimenList.get(0));
+        return specimenList.isEmpty() ? Optional.empty() : Optional.of(specimenList.getFirst());
     }
 
     public void deleteSpecimenById(String id) throws SolrServerException, IOException {

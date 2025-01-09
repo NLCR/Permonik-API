@@ -57,18 +57,25 @@ public class Volume extends Auditable {
     private Integer year;
     @Field
     private String mutationMark;
-//
-//    @Field
-//    private LocalDateTime created;
-//    @Field
-//    private String createdBy;
-//    @Field
-//    private LocalDateTime updated;
-//    @Field
-//    private String updatedBy;
-//    @Field
-//    private LocalDateTime deleted;
-//    @Field
-//    private String deletedBy;
+
+    // Custom getter for `subName`
+    public String getSubName() {
+        return subName == null ? "" : subName;
+    }
+
+    // Custom getter for `note`
+    public String getNote() {
+        return note == null ? "" : note;
+    }
+
+    // Custom getter for `signature`
+    public String getSignature() {
+        return signature == null ? "" : signature;
+    }
+
+    // Custom getter for `mutationMark`
+    public String getMutationMark() {
+        return mutationMark == null ? "" : mutationMark;
+    }
 
 }

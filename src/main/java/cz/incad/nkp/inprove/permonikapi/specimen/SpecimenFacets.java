@@ -40,35 +40,35 @@ public class SpecimenFacets implements SpecimenDefinition {
     }
 
     String getNamesQueryString() {
-        return doTextListCollection(this.names, NAME_FIELD);
+        return doTextListCollection(names, NAME_FIELD);
     }
 
     String getSubNamesQueryString() {
-        return doTextListCollection(this.subNames, SUB_NAME_FIELD);
+        return doTextListCollection(subNames, SUB_NAME_FIELD);
     }
 
     String getMutationsQueryString() {
-        return doUUIDListCollection(this.mutationIds, MUTATION_ID_FIELD);
+        return doUUIDListCollection(mutationIds, MUTATION_ID_FIELD);
     }
 
     String getEditionsQueryString() {
-        return doUUIDListCollection(this.editionIds, EDITION_ID_FIELD);
+        return doUUIDListCollection(editionIds, EDITION_ID_FIELD);
     }
 
     String getMutationMarkQueryString() {
-        return doTextListCollection(this.mutationMarks, MUTATION_MARK_FIELD);
+        return doTextListCollection(mutationMarks, MUTATION_MARK_FIELD);
     }
 
     String getOwnersQueryString() {
-        return doUUIDListCollection(this.ownerIds, OWNER_ID_FIELD);
+        return doUUIDListCollection(ownerIds, OWNER_ID_FIELD);
     }
 
     String getDamageTypesQueryString() {
-        return doUUIDListCollection(this.damageTypes, DAMAGE_TYPES_FIELD);
+        return doUUIDListCollection(damageTypes, DAMAGE_TYPES_FIELD);
     }
 
     String getBarCodeQueryString() {
-        return BAR_CODE_FIELD + ":*" + this.barCode + "*";
+        return BAR_CODE_FIELD + ":*" + barCode + "*";
     }
 
     // Utility method to escape special characters in query strings

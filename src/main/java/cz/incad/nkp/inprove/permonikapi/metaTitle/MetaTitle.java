@@ -21,4 +21,9 @@ public class MetaTitle extends Auditable {
     @Field
     private Boolean isPublic;
 
+    // Custom getter for `note`
+    public String getNote() {
+        return note == null ? "" : note;
+    }
+
 }

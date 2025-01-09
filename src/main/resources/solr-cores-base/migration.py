@@ -5,6 +5,9 @@ import uuid
 import copy
 from datetime import datetime
 
+# import http.client
+# http.client.HTTPConnection.debuglevel = 1
+
 # Připojení k nové Solr instanci (verze 9)
 new_solr_meta = pysolr.Solr('http://localhost:8983/solr/metatitle', always_commit=True)
 new_solr_volume = pysolr.Solr('http://localhost:8983/solr/volume', always_commit=True)
@@ -24,7 +27,13 @@ old_solr_users = pysolr.Solr('http://localhost:8984/solr/user', always_commit=Tr
 now = datetime.now()
 current_time = now.strftime('%Y-%m-%dT%H:%M:%S.%f') + '{:03d}'.format(now.microsecond % 1000) + 'Z'
 
-
+def is_valid_date_format(date_string):
+    try:
+        # Pokusí se převést datum na objekt datetime
+        datetime.strptime(date_string, "%Y-%m-%d")
+        return True
+    except ValueError:
+        return False
 
 def extract_damaged_pages(json_string):
     if not json_string:
@@ -120,7 +129,6 @@ def transform_periodicity(old_data, editions_mapping):
         "isPriloha": "isAttachment"
     }
 
-    # TODO: investigate bez označení editionId. There are numeres ids and string ids I think
     # Transform the data
     new_data = []
     for entry in old_data:
@@ -128,7 +136,8 @@ def transform_periodicity(old_data, editions_mapping):
         for old_field, new_field in field_mapping.items():
             if new_field:  # Skip fields with an empty new_field name
                 if new_field == "editionId":
-                    transformed_entry[new_field] = editions_mapping.get(entry.get(old_field, "0"))
+                    valid_values = {'0', '1', '2', '3', '4', '5', '6'}
+                    transformed_entry[new_field] = editions_mapping.get(entry.get(old_field) if entry.get(old_field) in valid_values else '0')
                 elif new_field == "pagesCount":
                     transformed_entry[new_field] = extract_number(entry.get(old_field, "0"))
                 elif new_field == "isAttachment":
@@ -168,14 +177,14 @@ def generate_uuid():
 def create_initial_data():
     # Edice
     editions = [
-        {"id": generate_uuid(), "name": {"cs": "Bez označení", "sk": "Bez označenia", "en": "Without marking"}, "isDefault": True, "isAttachment": False, "isPeriodicAttachment": False, "created": current_time, "createdBy": ""},
-        {"id": generate_uuid(), "name": {"cs": "Ranní", "sk": "Ranné", "en": "Morning"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False, "created": current_time, "createdBy": ""},
-        {"id": generate_uuid(), "name": {"cs": "Polední", "sk": "Poludnie", "en": "Midday"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False, "created": current_time, "createdBy": ""},
-        {"id": generate_uuid(), "name": {"cs": "Odpolední", "sk": "Popoludnie", "en": "Afternoon"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False, "created": current_time, "createdBy": ""},
-        {"id": generate_uuid(), "name": {"cs": "Večerní", "sk": "Večerné", "en": "Evening"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False, "created": current_time, "createdBy": ""},
-        {"id": generate_uuid(), "name": {"cs": "Jiné", "sk": "Iné", "en": "Other"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False, "created": current_time, "createdBy": ""},
-        {"id": generate_uuid(), "name": {"cs": "Jiná příloha", "sk": "Iná príloha", "en": "Another attachment"}, "isDefault": False, "isAttachment": True, "isPeriodicAttachment": False, "created": current_time, "createdBy": ""},
-        {"id": generate_uuid(), "name": {"cs": "Pravidelná příloha", "sk": "Pravidelná príloha", "en": "Periodic attachment"}, "isDefault": False, "isAttachment": True, "isPeriodicAttachment": True, "created": current_time, "createdBy": ""}
+        {"id": generate_uuid(), "name": {"cs": "Bez označení", "sk": "Bez označenia", "en": "Without marking"}, "isDefault": True, "isAttachment": False, "isPeriodicAttachment": False, "created": current_time, "createdBy": "migration-script"},
+        {"id": generate_uuid(), "name": {"cs": "Ranní", "sk": "Ranné", "en": "Morning"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False, "created": current_time, "createdBy": "migration-script"},
+        {"id": generate_uuid(), "name": {"cs": "Polední", "sk": "Poludnie", "en": "Midday"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False, "created": current_time, "createdBy": "migration-script"},
+        {"id": generate_uuid(), "name": {"cs": "Odpolední", "sk": "Popoludnie", "en": "Afternoon"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False, "created": current_time, "createdBy": "migration-script"},
+        {"id": generate_uuid(), "name": {"cs": "Večerní", "sk": "Večerné", "en": "Evening"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False, "created": current_time, "createdBy": "migration-script"},
+        {"id": generate_uuid(), "name": {"cs": "Jiné", "sk": "Iné", "en": "Other"}, "isDefault": False, "isAttachment": False, "isPeriodicAttachment": False, "created": current_time, "createdBy": "migration-script"},
+        {"id": generate_uuid(), "name": {"cs": "Jiná příloha", "sk": "Iná príloha", "en": "Another attachment"}, "isDefault": False, "isAttachment": True, "isPeriodicAttachment": False, "created": current_time, "createdBy": "migration-script"},
+        {"id": generate_uuid(), "name": {"cs": "Pravidelná příloha", "sk": "Pravidelná príloha", "en": "Periodic attachment"}, "isDefault": False, "isAttachment": True, "isPeriodicAttachment": True, "created": current_time, "createdBy": "migration-script"}
     ]
     # Create a new list for Solr submissions
     solr_editions = copy.deepcopy(editions)
@@ -193,10 +202,10 @@ def create_initial_data():
 
     # Mutace
     mutations = [
-        {"id": generate_uuid(), "name": {"cs": "Bez označení", "sk": "Bez označenia", "en": "Without marking"}, "created": current_time, "createdBy": ""},
-        {"id": generate_uuid(), "name": {"cs": "Brno", "sk": "Brno", "en": "Brno"}, "created": current_time, "createdBy": ""},
-        {"id": generate_uuid(), "name": {"cs": "Praha", "sk": "Praha", "en": "Praha"}, "created": current_time, "createdBy": ""},
-        {"id": generate_uuid(), "name": {"cs": "Ostrava", "sk": "Ostrava", "en": "Ostrava"}, "created": current_time, "createdBy": ""},
+        {"id": generate_uuid(), "name": {"cs": "Bez označení", "sk": "Bez označenia", "en": "Without marking"}, "created": current_time, "createdBy": "migration-script"},
+        {"id": generate_uuid(), "name": {"cs": "Brno", "sk": "Brno", "en": "Brno"}, "created": current_time, "createdBy": "migration-script"},
+        {"id": generate_uuid(), "name": {"cs": "Praha", "sk": "Praha", "en": "Praha"}, "created": current_time, "createdBy": "migration-script"},
+        {"id": generate_uuid(), "name": {"cs": "Ostrava", "sk": "Ostrava", "en": "Ostrava"}, "created": current_time, "createdBy": "migration-script"},
     ]
     solr_mutations = copy.deepcopy(mutations)
 
@@ -209,11 +218,11 @@ def create_initial_data():
 
     # Vlastníci
     owners = [
-        {"id": generate_uuid(), "name": "Národní knihovna České republiky", "shorthand": "NKP", "sigla": "ABA001", "created": current_time, "createdBy": ""},
-        {"id": generate_uuid(), "name": "Moravská zemská knihovna v Brně", "shorthand": "MZK", "sigla": "BOA001", "created": current_time, "createdBy": ""},
-        {"id": generate_uuid(), "name": "Vědecká knihovna v Olomouci", "shorthand": "VKOL", "sigla": "OLA001", "created": current_time, "createdBy": ""},
-        {"id": generate_uuid(), "name": "Knihovna Ústeckého kraje, příspěvková organizace", "shorthand": "KUK", "sigla": "ULG001", "created": current_time, "createdBy": ""},
-        {"id": generate_uuid(), "name": "Krajská knihovna v Pardubicích", "shorthand": "PaKK", "sigla": "PAG001", "created": current_time, "createdBy": ""}
+        {"id": generate_uuid(), "name": "Národní knihovna České republiky", "shorthand": "NKP", "sigla": "ABA001", "created": current_time, "createdBy": "migration-script"},
+        {"id": generate_uuid(), "name": "Moravská zemská knihovna v Brně", "shorthand": "MZK", "sigla": "BOA001", "created": current_time, "createdBy": "migration-script"},
+        {"id": generate_uuid(), "name": "Vědecká knihovna v Olomouci", "shorthand": "VKOL", "sigla": "OLA001", "created": current_time, "createdBy": "migration-script"},
+        {"id": generate_uuid(), "name": "Knihovna Ústeckého kraje, příspěvková organizace", "shorthand": "KUK", "sigla": "ULG001", "created": current_time, "createdBy": "migration-script"},
+        {"id": generate_uuid(), "name": "Krajská knihovna v Pardubicích", "shorthand": "PaKK", "sigla": "PAG001", "created": current_time, "createdBy": "migration-script"}
     ]
     new_solr_owners.add(owners)
 
@@ -248,7 +257,7 @@ def migrate_user(owners_mapping):
         else:
             new_user["firstName"] = ""
             new_user["lastName"] = ""
-        if user.get("email") and user.get("username") != "admin":
+        if new_user.get("email") and len(new_user.get("userName")) > 0 and new_user.get("userName") != "admin":
             new_users.append(new_user)
 
     new_solr_users.add(new_users)
@@ -262,12 +271,12 @@ def migrate_metatitle():
     for meta in old_meta_titles:
         new_meta = {
             "id": generate_uuid(),
-            "name": meta.get("meta_nazev").strip(),
+            "name": meta.get("meta_nazev", "").strip(),
             # "periodicity": meta.get("periodicita").strip(),
             "note": meta.get("poznamka", "").strip(),
             "isPublic": meta.get("show_to_not_logged_users", True),
             "created": current_time,
-            "createdBy": ""
+            "createdBy": "migration-script"
         }
         old_meta_titles_ids.append(meta.get("id"))
         new_meta_titles.append(new_meta)
@@ -283,7 +292,9 @@ def migrate_volume(meta_title_mapping, mutations_mapping, owners_mapping, editio
     old_volumes = old_solr_volume.search('*:*', rows=1000000)  # Adjust the number of rows as needed
     new_volumes = []
 
+
     for vol in old_volumes:
+        periodicity = transform_periodicity(vol.get("periodicita").strip(), editions_mapping)
         new_vol = {
             "id": generate_uuid(),
             "barCode": vol.get("carovy_kod").strip(),
@@ -292,34 +303,48 @@ def migrate_volume(meta_title_mapping, mutations_mapping, owners_mapping, editio
             "metaTitleId": meta_title_mapping.get(vol.get("id_titul").strip(), ""),
             "mutationId": mutations_mapping.get(vol.get("mutace").strip()),
             "subName": "",
-            "periodicity": transform_periodicity(vol.get("periodicita").strip(), editions_mapping),
+            "periodicity": periodicity,
             "firstNumber": vol.get("prvni_cislo").strip(),
             "lastNumber": vol.get("posledni_cislo").strip(),
             "note": vol.get("poznamka", "").strip(),
             "showAttachmentsAtTheEnd": vol.get("show_attachments_at_the_end", False),
-            "signature": vol.get("signatura").strip(),
+            "signature": vol.get("signatura", "").strip(),
             "ownerId": owners_mapping.get(vol.get("vlastnik").strip()),
             "year": convert_year(vol.get("year")) if vol.get("year") and len(vol.get("year")) > 0 else convert_year(vol.get("datum_od", "").strip()),
-            "mutationMark": vol.get("znak_oznaceni_vydani").strip(),
+            "mutationMark": vol.get("znak_oznaceni_vydani", "").strip(),
             "created": current_time,
-            "createdBy": ""
+            "createdBy": "migration-script"
         }
-        new_volumes.append(new_vol)
+
+        if new_vol["metaTitleId"] is not None and len(new_vol["metaTitleId"]) == 36 and new_vol["barCode"] is not None and len(new_vol["barCode"]) > 0:
+            new_volumes.append(new_vol)
 
     new_solr_volume.add(new_volumes)
-    return {vol["barCode"]: vol["id"] for vol in new_volumes}  # Return mapping for further use
+    return {vol["barCode"]: (vol["id"], vol["periodicity"], vol["dateFrom"], vol["dateTo"]) for vol in new_volumes}  # Return mapping for further use
 
 
 def migrate_exemplar(meta_title_mapping, volume_mapping, owners_mapping, editions_mapping, mutations_mapping):
     old_exemplars = old_solr_exemplar.search('*:*', rows=1000000)  # Adjust the number of rows as needed
     new_exemplars = []
+    exemplars_with_num_missing = {}
+    exemplars_with_bad_date = {}
 
     for ex in old_exemplars:
+        # Extract the publication date from the exemplar
+        publication_date_orig = re.sub(r"T.*", "", ex.get("datum_vydani").strip()) if ex.get("datum_vydani") else None
+        publication_datetime = datetime.strptime(publication_date_orig,"%Y-%m-%d") if publication_date_orig else None
+        publication_date_string = datetime.strptime(publication_date_orig, "%Y-%m-%d").strftime("%Y%m%d") if publication_date_orig else None
+
+        # Get the volume data from the volume mapping using the carovy_kod
+        bar_code = ex.get("carovy_kod", "").strip()
+        volume_id, periodicity, volume_date_from, volume_date_to = volume_mapping.get(bar_code, ("", [], "", ""))
+
+
         new_ex = {
             "id": generate_uuid(),
             "metaTitleId": meta_title_mapping.get(ex.get("id_titul").strip(), ""),
             # "metaTitleName": ex.get("meta_nazev").strip(),
-            "volumeId": volume_mapping.get(ex.get("carovy_kod").strip(), ""),
+            "volumeId": volume_id,
             "barCode": ex.get("carovy_kod", "").strip(),
             "numExists": ex.get("numExists", False),
             "numMissing": ex.get("missing_number", False),
@@ -329,28 +354,67 @@ def migrate_exemplar(meta_title_mapping, volume_mapping, owners_mapping, edition
             "damagedPages": extract_damaged_pages(ex.get("pages").strip()),
             "missingPages": extract_missing_pages(ex.get("pages").strip()),
             "note": ex.get("poznamka", "").strip(),
-            "name": ex.get("nazev").strip(),
-            "subName": ex.get("podnazev").strip(),
+            "name": ex.get("nazev", "").strip(),
+            "subName": ex.get("podnazev", "").strip(),
             "editionId": editions_mapping.get(ex.get("vydani").strip(), editions_mapping.get("0")),
             "mutationId": mutations_mapping.get(ex.get("mutace").strip()),
-            "mutationMark": ex.get("znak_oznaceni_vydani").strip(),
-            "publicationDate": ex.get("datum_vydani").strip() if ex.get("datum_vydani") else None,
-            "publicationDateString": ex.get("datum_vydani_den", "").strip(),
+            "mutationMark": ex.get("znak_oznaceni_vydani", "").strip(),
+            "publicationDate": publication_date_orig if publication_date_orig else None,
+            "publicationDateString": publication_date_string if publication_date_orig else None,
             "number": ex.get("cislo", None) if not ex.get("isPriloha", False) else None,
             "attachmentNumber": ex.get("cislo", None) if ex.get("isPriloha", False) else None,
             "pagesCount": ex.get("pocet_stran"),
             "isAttachment": ex.get("isPriloha", False),
             "created": current_time,
-            "createdBy": ""
+            "createdBy": "migration-script"
         }
-        new_exemplars.append(new_ex)
+
+
+
+
+        # Now check if this exemplar is missing based on periodicity and numExists flag
+        if publication_datetime and volume_date_from and volume_date_to and not new_ex["numMissing"] and is_valid_date_format(new_ex["publicationDate"]):
+            volume_start_date = datetime.strptime(volume_date_from, "%Y-%m-%d")
+            volume_end_date = datetime.strptime(volume_date_to, "%Y-%m-%d")
+
+            if volume_start_date <= publication_datetime <= volume_end_date:
+                # Check if the exemplar's publication date corresponds to a day in the periodicity
+                day_of_week = publication_datetime.strftime("%A")  # Get the day of the week (e.g., "Monday")
+                transformed_periodicity = json.loads(periodicity)
+                # print(transformed_periodicity)
+                for period in transformed_periodicity:
+                    # print(period["day"])
+                    if period["day"] == day_of_week and period["numExists"] and not new_ex["numExists"]:
+                        # If numExists is false, we need to set numMissing to true for this exemplar
+                        new_ex["numMissing"] = True
+                        new_ex["number"] = None
+                        new_ex["attachmentNumber"] = None
+                        break
+
+        # Store exemplars with numMissing = true in the dictionary under their volume_id
+        if new_ex["numMissing"]:
+            if volume_id not in exemplars_with_num_missing:
+                exemplars_with_num_missing[volume_id] = []
+            exemplars_with_num_missing[volume_id].append(new_ex)
+
+        if new_ex["publicationDate"] is not None and len(new_ex["publicationDate"]) >= 10 and new_ex["volumeId"] is not None and len(new_ex["volumeId"]) == 36 and new_ex["metaTitleId"] is not None and len(new_ex["metaTitleId"]) == 36:
+            new_exemplars.append(new_ex)
+
+
 
     new_solr_exemplar.add(new_exemplars)
+
+    # Now print out the volume_id and its corresponding exemplars with numMissing
+    for volume_id, exemplars in exemplars_with_num_missing.items():
+        print(f"Volume ID: {volume_id}")
+        for exemplar in exemplars:
+            print(f"{exemplar['publicationDate']}")
+    # print(len(exemplars_with_num_missing.items()))
 
 
 def main():
     mappings = create_initial_data()
-    migrate_user(mappings["owners"])
+    # migrate_user(mappings["owners"])
     meta_title_mapping = migrate_metatitle()
     volume_mapping = migrate_volume(meta_title_mapping, mappings["mutations"], mappings["owners"], mappings["editions"])
     migrate_exemplar(meta_title_mapping, volume_mapping, mappings["owners"], mappings["editions"],

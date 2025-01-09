@@ -54,7 +54,7 @@ public class VolumeService implements VolumeDefinition {
         List<Volume> volumeList = response.getBeans(Volume.class);
 
 
-        return volumeList.isEmpty() ? Optional.empty() : Optional.of(volumeDTOMapper.apply(volumeList.get(0)));
+        return volumeList.isEmpty() ? Optional.empty() : Optional.of(volumeDTOMapper.apply(volumeList.getFirst()));
     }
 
     public Optional<Volume> getVolumeById(String volumeId) throws SolrServerException, IOException {
@@ -67,7 +67,7 @@ public class VolumeService implements VolumeDefinition {
 
         List<Volume> volumeList = response.getBeans(Volume.class);
 
-        return volumeList.isEmpty() ? Optional.empty() : Optional.of(volumeList.get(0));
+        return volumeList.isEmpty() ? Optional.empty() : Optional.of(volumeList.getFirst());
     }
 
 

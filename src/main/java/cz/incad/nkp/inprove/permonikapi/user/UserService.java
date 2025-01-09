@@ -73,7 +73,7 @@ public class UserService implements UserDefinition {
             return null;
         }
 
-        return userList.get(0);
+        return userList.getFirst();
     }
 
     public User createUser(User user) throws SolrServerException, IOException {

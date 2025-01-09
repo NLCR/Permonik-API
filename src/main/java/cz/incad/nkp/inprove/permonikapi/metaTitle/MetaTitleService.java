@@ -38,14 +38,19 @@ public class MetaTitleService implements MetaTitleDefinition {
 
     public Optional<MetaTitle> getMetaTitleById(String metaTitleId) throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery("*:*");
-        solrQuery.addFilterQuery(IS_PUBLIC_FIELD + ":true", ID_FIELD + ":\"" + metaTitleId + "\"");
+        solrQuery.addFilterQuery(ID_FIELD + ":\"" + metaTitleId + "\"");
+
+        if (getCurrentUser() == null) {
+            solrQuery.addFilterQuery(IS_PUBLIC_FIELD + ":true");
+        }
+
         solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
         solrQuery.setRows(1);
 
         QueryResponse response = solrClient.query(META_TITLE_CORE_NAME, solrQuery);
         List<MetaTitle> metaTitleList = response.getBeans(MetaTitle.class);
 
-        return metaTitleList.isEmpty() ? Optional.empty() : Optional.of(metaTitleList.get(0));
+        return metaTitleList.isEmpty() ? Optional.empty() : Optional.of(metaTitleList.getFirst());
     }
 
     public List<MetaTitle> getMetaTitles() throws SolrServerException, IOException {
