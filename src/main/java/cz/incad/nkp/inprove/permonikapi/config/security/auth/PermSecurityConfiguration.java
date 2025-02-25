@@ -4,7 +4,6 @@ import cz.incad.nkp.inprove.permonikapi.config.security.user.UserDetailsServiceI
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -14,25 +13,29 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 
 @Configuration
 @EnableWebSecurity
 @AllArgsConstructor
 @EnableMethodSecurity
-@Order(2)
 public class PermSecurityConfiguration {
 
     private UserDetailsServiceImpl userDetailsService;
     private PasswordEncoder passwordEncoder;
-//    private ProfileManager profileManager;
+
+    @Bean
+    public HttpFirewall allowNonAsciiHeadersFirewall() {
+        StrictHttpFirewall firewall = new StrictHttpFirewall();
+        // Allow non-ASCII characters for shibboleth registration redirect
+        firewall.setAllowedHeaderValues(value -> true);
+        return firewall;
+    }
 
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        if (profileManager.isDevelopment()) {
-//            http.authorizeHttpRequests((authz) -> authz.anyRequest().permitAll())
-//                    .csrf(AbstractHttpConfigurer::disable);
-//        } else {
         http
                 .authorizeHttpRequests((authz) -> authz
                         .requestMatchers("/swagger-ui/**").permitAll()
@@ -71,17 +74,14 @@ public class PermSecurityConfiguration {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
-//        }
+
+        http.setSharedObject(HttpFirewall.class, allowNonAsciiHeadersFirewall());
 
 
         return http.build();
     }
 
-    //    @Bean
-//    public BasicAuthenticationFilter basicAuthenticationFilter(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-//        return new BasicAuthenticationFilter(authenticationConfiguration.getAuthenticationManager());
-//    }
-//
+
     @Bean
     public DaoAuthenticationProvider daoAuthenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();

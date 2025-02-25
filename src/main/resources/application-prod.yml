@@ -8,7 +8,7 @@ solr:
 
 server:
   port: 8080
-  forward-headers-strategy: NATIVE
+  forward-headers-strategy: FRAMEWORK
   error:
     path: /error
     whitelabel:

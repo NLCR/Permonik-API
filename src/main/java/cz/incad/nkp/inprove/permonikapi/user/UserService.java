@@ -62,6 +62,7 @@ public class UserService implements UserDefinition {
 
     public User findUserByUserName(String userName) throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery("*:*");
+        // TODO: check if user is active
         solrQuery.addFilterQuery(USERNAME_FIELD + ":\"" + userName + "\"");
         solrQuery.setRows(1);
 

@@ -72,7 +72,7 @@ public class VolumeService implements VolumeDefinition {
 
 
     public VolumeDetailDTO getVolumeDetailById(String volumeId, Boolean onlyPublic) throws SolrServerException, IOException {
-
+        //TODO: check isPublic when not logged in
         Optional<VolumeDTO> optVolume = getVolumeDTOById(volumeId);
 
         if (optVolume.isEmpty()) {
@@ -95,6 +95,7 @@ public class VolumeService implements VolumeDefinition {
 
     public VolumeOverviewStatsDTO getVolumeOverviewStats(String volumeId) throws SolrServerException, IOException {
 
+        //TODO: check isPublic when not logged in
         Optional<VolumeDTO> optVolume = getVolumeDTOById(volumeId);
 
         if (optVolume.isEmpty()) {

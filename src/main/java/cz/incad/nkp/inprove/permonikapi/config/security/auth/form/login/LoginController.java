@@ -29,13 +29,5 @@ public class LoginController {
         loginService.basicLogin(loginDto, request);
     }
 
-//    @Operation(summary = "Login with username and password")
-//    @ApiResponse(responseCode = "200", description = "OK")
-//    @GetMapping("/login/basic")
-//    public void login() {
-//        /**
-//         * This method is not implemented, because it is handled by {@link cz.incad.nkp.inprove.permonikapi.config.security.auth.form.PermHttpBasicFormSecurityConfiguration}
-//         */
-//    }
 
 }
