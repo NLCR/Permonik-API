@@ -8,12 +8,10 @@ import java.util.List;
 public record SpecimensForVolumeOverviewStatsDTO(
         Object publicationDayMin,
         Object publicationDayMax,
-        Object numberMin,
-        Object numberMax,
         Object pagesCount,
         List<FacetFieldDTO> mutationIds,
-        List<FacetFieldDTO> publicationMark,
-        List<FacetFieldDTO> publicationIds,
+        List<FacetFieldDTO> mutationMarks,
+        List<FacetFieldDTO> editionIds,
         List<FacetFieldDTO> damageTypes,
         List<FacetFieldDTO> publicationDayRanges,
         List<Specimen> specimens

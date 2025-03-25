@@ -7,7 +7,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
@@ -26,14 +29,5 @@ public class LoginController {
         loginService.basicLogin(loginDto, request);
     }
 
-    @Operation(summary = "Login with username and password")
-    @ApiResponse(responseCode = "200", description = "OK")
-//    @SecurityRequirement(name = BASIC_SECURITY_SCHEME)
-    @GetMapping("/login/basic")
-    public void login() {
-        /**
-         * This method is not implemented, because it is handled by {@link cz.incad.nkp.inprove.permonikapi.config.security.auth.form.PermHttpBasicFormSecurityConfiguration}
-         */
-    }
 
 }

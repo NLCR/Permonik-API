@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.List;
 
+import static cz.incad.nkp.inprove.permonikapi.audit.AuditableDefinition.DELETED_FIELD;
+
 @Service
 public class OwnerService implements OwnerDefinition {
 
@@ -32,6 +34,7 @@ public class OwnerService implements OwnerDefinition {
 
     public List<Owner> getOwners() throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery("*:*");
+        solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
         solrQuery.setRows(100000);
         solrQuery.setSort(NAME_FIELD, SolrQuery.ORDER.asc);
 
@@ -54,6 +57,8 @@ public class OwnerService implements OwnerDefinition {
             throw new RuntimeException("Owner not found");
         }
 
+        owner.preUpdate();
+
         try {
             solrClient.addBean(OWNER_CORE_NAME, owner);
             solrClient.commit(OWNER_CORE_NAME);
@@ -67,7 +72,7 @@ public class OwnerService implements OwnerDefinition {
 
     public void createOwner(CreatableOwnerDTO owner) throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery("*:*");
-        solrQuery.addFilterQuery(NAME_FIELD + ":\"" + owner.name() + "\"");
+        solrQuery.addFilterQuery(SHORTHAND_FIELD + ":\"" + owner.shorthand() + "\"");
         solrQuery.setRows(1);
 
         QueryResponse response = solrClient.query(OWNER_CORE_NAME, solrQuery);
@@ -75,12 +80,13 @@ public class OwnerService implements OwnerDefinition {
         List<Owner> ownerList = response.getBeans(Owner.class);
 
         if (!ownerList.isEmpty()) {
-            throw new RuntimeException("Owner with this name already exists");
+            throw new RuntimeException("Owner with this shorthand already exists");
         }
 
         Owner newOwner = new Owner();
         creatableOwnerMapper.createOwner(owner, newOwner);
 
+        newOwner.prePersist();
 
         try {
             solrClient.addBean(OWNER_CORE_NAME, newOwner);

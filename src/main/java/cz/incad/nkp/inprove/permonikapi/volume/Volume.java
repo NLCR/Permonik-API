@@ -1,16 +1,17 @@
 package cz.incad.nkp.inprove.permonikapi.volume;
 
+import cz.incad.nkp.inprove.permonikapi.audit.Auditable;
 import lombok.*;
 import org.apache.solr.client.solrj.beans.Field;
 
 
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode
-@ToString
-@Setter
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @Getter
-public class Volume {
+@Setter
+public class Volume extends Auditable {
 
     @Field
     private String id; // UUID
@@ -23,13 +24,15 @@ public class Volume {
     @Field
     private String metaTitleId; // UUID of metaTitle
     @Field
+    private String subName;
+    @Field
     private String mutationId; // UUID of mutation
     /*
     periodicity as string
     {
       "day": "Monday",
       "numExists": true,
-      "publicationId": "fd041788-b3c3-4fe9-b824-899aaad62ca3",
+      "editionId": "fd041788-b3c3-4fe9-b824-899aaad62ca3",
       "pagesCount": 0,
       "name": "Mladá fronta (TESTOVACÍ DATA)",
       "subName": "",
@@ -53,6 +56,26 @@ public class Volume {
     @Field
     private Integer year;
     @Field
-    private String publicationMark;
+    private String mutationMark;
+
+    // Custom getter for `subName`
+    public String getSubName() {
+        return subName == null ? "" : subName;
+    }
+
+    // Custom getter for `note`
+    public String getNote() {
+        return note == null ? "" : note;
+    }
+
+    // Custom getter for `signature`
+    public String getSignature() {
+        return signature == null ? "" : signature;
+    }
+
+    // Custom getter for `mutationMark`
+    public String getMutationMark() {
+        return mutationMark == null ? "" : mutationMark;
+    }
 
 }

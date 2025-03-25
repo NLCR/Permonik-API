@@ -8,6 +8,7 @@ public record SearchedSpecimensDTO(
         List<Specimen> specimens,
         Object publicationDayMax,
         Object publicationDayMin,
-        Integer count
+        Integer count,
+        List<String> owners
 ) {
 }

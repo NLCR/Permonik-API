@@ -6,8 +6,8 @@ public record FacetsDTO(
         List<FacetFieldDTO> names,
         List<FacetFieldDTO> subNames,
         List<FacetFieldDTO> mutationIds,
-        List<FacetFieldDTO> publicationIds,
-        List<FacetFieldDTO> publicationMarks,
+        List<FacetFieldDTO> editionIds,
+        List<FacetFieldDTO> mutationMarks,
         List<FacetFieldDTO> ownerIds,
         List<FacetFieldDTO> damageTypes
 ) {

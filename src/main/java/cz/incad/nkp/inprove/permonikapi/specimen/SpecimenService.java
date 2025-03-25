@@ -6,7 +6,6 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.*;
-import org.apache.solr.common.params.FacetParams;
 import org.apache.solr.common.params.GroupParams;
 import org.apache.solr.common.params.StatsParams;
 import org.slf4j.Logger;
@@ -16,6 +15,10 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static cz.incad.nkp.inprove.permonikapi.audit.AuditableDefinition.DELETED_FIELD;
+import static cz.incad.nkp.inprove.permonikapi.utils.DateValidator.isValidDate;
 
 @Service
 public class SpecimenService implements SpecimenDefinition {
@@ -33,6 +36,7 @@ public class SpecimenService implements SpecimenDefinition {
     public StatsForMetaTitleOverviewDTO getStatsForMetaTitleOverview(String metaTitleId) throws SolrServerException, IOException {
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.setFilterQueries(META_TITLE_ID_FIELD + ":\"" + metaTitleId + "\"", NUM_EXISTS_FIELD + ":true");
+        solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
         solrQuery.setParam(StatsParams.STATS, true);
         solrQuery.setParam(StatsParams.STATS_FIELD, MUTATION_ID_FIELD, PUBLICATION_DATE_STRING_FIELD, OWNER_ID_FIELD);
         solrQuery.setParam(StatsParams.STATS_CALC_DISTINCT, true);
@@ -56,7 +60,7 @@ public class SpecimenService implements SpecimenDefinition {
         Long ownersCount = ownersStats.getCountDistinct();
 
         GroupResponse groupResponse = response.getGroupResponse();
-        GroupCommand groupCommand = groupResponse.getValues().get(0);
+        GroupCommand groupCommand = groupResponse.getValues().getFirst();
         Integer matchedSpecimens = groupCommand.getMatches();
 
 
@@ -67,11 +71,14 @@ public class SpecimenService implements SpecimenDefinition {
 
     public SearchedSpecimensDTO getSearchedSpecimens(String metaTitleId, Integer offset, Integer rows, String facets, String view) throws IOException, SolrServerException {
 
+        Integer localRows = rows;
+
         ObjectMapper objectMapper = new ObjectMapper();
         SpecimenFacets specimenFacets = objectMapper.readValue(facets, SpecimenFacets.class);
 
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.setFilterQueries(META_TITLE_ID_FIELD + ":\"" + metaTitleId + "\"", NUM_EXISTS_FIELD + ":true");
+        solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
 
         if (!specimenFacets.getNames().isEmpty()) {
             solrQuery.addFilterQuery(specimenFacets.getNamesQueryString());
@@ -85,12 +92,12 @@ public class SpecimenService implements SpecimenDefinition {
             solrQuery.addFilterQuery(specimenFacets.getMutationsQueryString());
         }
 
-        if (!specimenFacets.getPublicationIds().isEmpty()) {
-            solrQuery.addFilterQuery(specimenFacets.getPublicationsQueryString());
+        if (!specimenFacets.getEditionIds().isEmpty()) {
+            solrQuery.addFilterQuery(specimenFacets.getEditionsQueryString());
         }
 
-        if (!specimenFacets.getPublicationMarks().isEmpty()) {
-            solrQuery.addFilterQuery(specimenFacets.getPublicationMarkQueryString());
+        if (!specimenFacets.getMutationMarks().isEmpty()) {
+            solrQuery.addFilterQuery(specimenFacets.getMutationMarkQueryString());
         }
 
 
@@ -108,36 +115,44 @@ public class SpecimenService implements SpecimenDefinition {
 
         // Add filtering based on year interval
         if (specimenFacets.getDateStart() > 0 && specimenFacets.getDateEnd() > 0 && Objects.equals(view, "table")) {
-            solrQuery.addFilterQuery(PUBLICATION_DATE_STRING_FIELD + ":[" + specimenFacets.getDateStart() + "0101 TO *]");
-            solrQuery.addFilterQuery(PUBLICATION_DATE_STRING_FIELD + ":[* TO " + specimenFacets.getDateEnd() + "1231]");
+            // getDateStart -> format: 2024 -> [2024-01-01 TO *]
+            solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[" + specimenFacets.getDateStart() + "-01-01 TO *]");
+            solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[* TO " + specimenFacets.getDateEnd() + "-12-31]");
         }
 
         if (Objects.equals(view, "calendar") && specimenFacets.getCalendarDateStart() != null && !specimenFacets.getCalendarDateStart().isEmpty()) {
-            solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[" + specimenFacets.getCalendarDateStart() + " TO *]");
-            solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[* TO " + specimenFacets.getCalendarDateEnd() + "]");
+            if (isValidDate(specimenFacets.getCalendarDateStart())) {
+                // getCalendarDateStart -> format: 1953-01-01T00:00:00.000Z -> [1953-01-01T00:00:00.000Z TO *]
+                solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[" + specimenFacets.getCalendarDateStart() + " TO *]");
+                solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[* TO " + specimenFacets.getCalendarDateEnd() + "]");
+            } else {
+                //preventing return of 1000 rows in calendar when calendar date isn't initialized yet
+                localRows = 0;
+            }
         }
 
         // copy query this way, because we need same filters
         SolrQuery groupQuery;
         groupQuery = solrQuery;
 
-        solrQuery.setParam(FacetParams.FACET, true);
-        solrQuery.addFacetField(NAME_FIELD, SUB_NAME_FIELD, MUTATION_ID_FIELD, PUBLICATION_ID_FIELD, PUBLICATION_MARK_FIELD, OWNER_ID_FIELD, DAMAGE_TYPES_FIELD);
-        solrQuery.setFacetMinCount(1);
-        solrQuery.setRows(rows);
+        solrQuery.setRows(localRows);
         solrQuery.setStart(offset);
         solrQuery.setSort(PUBLICATION_DATE_STRING_FIELD, SolrQuery.ORDER.asc);
         // TODO: join is not working, it always returns unknown field volumeId
 //        solrQuery.add("join", "{!join from=volumeId to=id fromIndex=volume}barCode:barCode");
-        // TODO this will be sorting based on UUID, that's wrong
-        solrQuery.addSort(PUBLICATION_ID_FIELD, SolrQuery.ORDER.desc);
+        // TODO: this will be sorting based on UUID, that's wrong
+        solrQuery.addSort(EDITION_ID_FIELD, SolrQuery.ORDER.desc);
 //        solrQuery.addSort(MUTATION_ID_FIELD, SolrQuery.ORDER.asc);
 
         QueryResponse response = solrClient.query(SPECIMEN_CORE_NAME, solrQuery);
         List<Specimen> specimenList = response.getBeans(Specimen.class);
+        List<String> ownerList = specimenList.stream()
+                .map(Specimen::getOwnerId)
+                .collect(Collectors.toSet()).stream().toList();
 
         SolrQuery statsQuery = new SolrQuery("*:*");
         statsQuery.setFilterQueries(META_TITLE_ID_FIELD + ":\"" + metaTitleId + "\"", NUM_EXISTS_FIELD + ":true");
+        statsQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
         statsQuery.setRows(0);
         statsQuery.setParam(StatsParams.STATS, true);
         statsQuery.setParam(StatsParams.STATS_FIELD, PUBLICATION_DATE_STRING_FIELD);
@@ -159,14 +174,15 @@ public class SpecimenService implements SpecimenDefinition {
 
         GroupResponse groupResponse = solrClient.query(SPECIMEN_CORE_NAME, solrQuery).getGroupResponse();
 
-        GroupCommand groupCommand = groupResponse.getValues().get(0);
+        GroupCommand groupCommand = groupResponse.getValues().getFirst();
         Integer groupedSpecimens = groupCommand.getMatches();
 
         return new SearchedSpecimensDTO(
                 specimenList,
                 publicationDayMax,
                 publicationDayMin,
-                groupedSpecimens
+                groupedSpecimens,
+                ownerList
         );
 
     }
@@ -178,14 +194,15 @@ public class SpecimenService implements SpecimenDefinition {
 
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.setFilterQueries(META_TITLE_ID_FIELD + ":\"" + metaTitleId + "\"", NUM_EXISTS_FIELD + ":true");
+        solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
         solrQuery.setRows(0);
         solrQuery.setStart(0);
 //        solrQuery.setSort(PUBLICATION_DATE_STRING_FIELD, SolrQuery.ORDER.asc);
         // TODO this will be sorting based on UUID, that's wrong
-        solrQuery.addSort(PUBLICATION_ID_FIELD, SolrQuery.ORDER.desc);
+        solrQuery.addSort(EDITION_ID_FIELD, SolrQuery.ORDER.desc);
 //        solrQuery.addSort(MUTATION_ID_FIELD, SolrQuery.ORDER.asc);
         solrQuery.setFacet(true);
-        solrQuery.addFacetField(NAME_FIELD, SUB_NAME_FIELD, MUTATION_ID_FIELD, PUBLICATION_ID_FIELD, PUBLICATION_MARK_FIELD, OWNER_ID_FIELD, DAMAGE_TYPES_FIELD);
+        solrQuery.addFacetField(NAME_FIELD, SUB_NAME_FIELD, MUTATION_ID_FIELD, EDITION_ID_FIELD, MUTATION_MARK_FIELD, OWNER_ID_FIELD, DAMAGE_TYPES_FIELD);
         solrQuery.setFacetMinCount(1);
 
         if (!specimenFacets.getNames().isEmpty()) {
@@ -200,12 +217,12 @@ public class SpecimenService implements SpecimenDefinition {
             solrQuery.addFilterQuery(specimenFacets.getMutationsQueryString());
         }
 
-        if (!specimenFacets.getPublicationIds().isEmpty()) {
-            solrQuery.addFilterQuery(specimenFacets.getPublicationsQueryString());
+        if (!specimenFacets.getEditionIds().isEmpty()) {
+            solrQuery.addFilterQuery(specimenFacets.getEditionsQueryString());
         }
 
-        if (!specimenFacets.getPublicationMarks().isEmpty()) {
-            solrQuery.addFilterQuery(specimenFacets.getPublicationMarkQueryString());
+        if (!specimenFacets.getMutationMarks().isEmpty()) {
+            solrQuery.addFilterQuery(specimenFacets.getMutationMarkQueryString());
         }
 
         if (!specimenFacets.getOwnerIds().isEmpty()) {
@@ -222,8 +239,9 @@ public class SpecimenService implements SpecimenDefinition {
 
         // Add filtering based on year interval for table view
         if (specimenFacets.getDateStart() > 0 && specimenFacets.getDateEnd() > 0 && Objects.equals(view, "table")) {
-            solrQuery.addFilterQuery(PUBLICATION_DATE_STRING_FIELD + ":[" + specimenFacets.getDateStart() + "0101 TO *]");
-            solrQuery.addFilterQuery(PUBLICATION_DATE_STRING_FIELD + ":[* TO " + specimenFacets.getDateEnd() + "1231]");
+            // getDateStart -> format: 2024 -> [2024-01-01 TO *]
+            solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[" + specimenFacets.getDateStart() + "-01-01 TO *]");
+            solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[* TO " + specimenFacets.getDateEnd() + "-12-31]");
         }
 
         QueryResponse response = solrClient.query(SPECIMEN_CORE_NAME, solrQuery);
@@ -232,25 +250,32 @@ public class SpecimenService implements SpecimenDefinition {
                 response.getFacetField(NAME_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
                 response.getFacetField(SUB_NAME_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
                 response.getFacetField(MUTATION_ID_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
-                response.getFacetField(PUBLICATION_ID_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
-                response.getFacetField(PUBLICATION_MARK_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
+                response.getFacetField(EDITION_ID_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
+                response.getFacetField(MUTATION_MARK_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
                 response.getFacetField(OWNER_ID_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
                 response.getFacetField(DAMAGE_TYPES_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList()
         );
 
     }
 
+    public List<Specimen> getSpecimensForVolumeDetail(String volumeId, Boolean onlyPublic) throws SolrServerException, IOException {
+        return getSpecimensForVolumeDetail(volumeId, onlyPublic, false);
+    }
 
     //    public List<Specimen> getSpecimensForVolumeDetail(String volumeId, String dateFrom, String dateTo) throws SolrServerException, IOException {
-    public List<Specimen> getSpecimensForVolumeDetail(String volumeId, Boolean onlyPublic) throws SolrServerException, IOException {
+    public List<Specimen> getSpecimensForVolumeDetail(String volumeId, Boolean onlyPublic, Boolean showAttachmentsAtTheEnd) throws SolrServerException, IOException {
 
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.addFilterQuery(VOLUME_ID_FIELD + ":\"" + volumeId + "\"");
         if (onlyPublic) {
             solrQuery.addFilterQuery(NUM_EXISTS_FIELD + ":true OR " + NUM_MISSING_FIELD + ":true");
         }
+        solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
 //        solrQuery.addFilterQuery(PUBLICATION_DATE_FIELD + ":[" + dateFrom + " TO " + dateTo + "]");
         solrQuery.setSort(PUBLICATION_DATE_STRING_FIELD, SolrQuery.ORDER.asc);
+        if (showAttachmentsAtTheEnd) {
+            solrQuery.setSort(IS_ATTACHMENT_FIELD, SolrQuery.ORDER.asc);
+        }
 //        solrQuery.setParam(StatsParams.STATS, true);
 //        solrQuery.setParam(StatsParams.STATS_FIELD, PUBLICATION_DATE_STRING_FIELD);
         solrQuery.setRows(100000);
@@ -279,6 +304,7 @@ public class SpecimenService implements SpecimenDefinition {
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.addFilterQuery(META_TITLE_ID_FIELD + ":\"" + metaTitleId + "\"");
         solrQuery.addFilterQuery(NUM_EXISTS_FIELD + ":true");
+        solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
         solrQuery.setParam(StatsParams.STATS, true);
         solrQuery.setParam(StatsParams.STATS_FIELD, PUBLICATION_DATE_STRING_FIELD);
         solrQuery.setRows(0);
@@ -305,11 +331,12 @@ public class SpecimenService implements SpecimenDefinition {
         SolrQuery solrQuery = new SolrQuery("*:*");
         solrQuery.addFilterQuery(VOLUME_ID_FIELD + ":\"" + volumeId + "\"");
         solrQuery.addFilterQuery(NUM_EXISTS_FIELD + ":true");
+        solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
         solrQuery.setParam(StatsParams.STATS, true);
-        solrQuery.setParam(StatsParams.STATS_FIELD, NUMBER_FIELD, PUBLICATION_DATE_STRING_FIELD, PAGES_COUNT_FIELD);
+        solrQuery.setParam(StatsParams.STATS_FIELD, PUBLICATION_DATE_STRING_FIELD, PAGES_COUNT_FIELD);
         solrQuery.setRows(0);
         solrQuery.setFacet(true);
-        solrQuery.addFacetField(MUTATION_ID_FIELD, PUBLICATION_MARK_FIELD, PUBLICATION_ID_FIELD, DAMAGE_TYPES_FIELD);
+        solrQuery.addFacetField(MUTATION_ID_FIELD, MUTATION_MARK_FIELD, EDITION_ID_FIELD, DAMAGE_TYPES_FIELD);
         solrQuery.addDateRangeFacet(PUBLICATION_DATE_FIELD, startDate, endDate, "+1YEAR");
         solrQuery.setFacetMinCount(1);
 
@@ -319,38 +346,35 @@ public class SpecimenService implements SpecimenDefinition {
 
         Object publicationDayMin = statsInfo.get(PUBLICATION_DATE_STRING_FIELD).getMin();
         Object publicationDayMax = statsInfo.get(PUBLICATION_DATE_STRING_FIELD).getMax();
-        Object numberMin = statsInfo.get(NUMBER_FIELD).getMin();
-        Object numberMax = statsInfo.get(NUMBER_FIELD).getMax();
         Object pagesCount = statsInfo.get(PAGES_COUNT_FIELD).getSum();
 
         SolrQuery solrQuery2 = new SolrQuery("*:*");
         solrQuery2.addFilterQuery(VOLUME_ID_FIELD + ":\"" + volumeId + "\"");
-        solrQuery2.addFilterQuery(NUM_EXISTS_FIELD + ":true");
+        solrQuery2.addFilterQuery(NUM_EXISTS_FIELD + ":true OR " + NUM_MISSING_FIELD + ":true");
+        solrQuery2.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
         solrQuery2.setRows(100000);
 
         QueryResponse response2 = solrClient.query(SPECIMEN_CORE_NAME, solrQuery2);
         List<Specimen> specimens = response2.getBeans(Specimen.class);
 
-
-        List<RangeFacet.Count> rangeFacetCounts = response.getFacetRanges().stream()
-                .filter(rangeFacet -> rangeFacet.getName().equals(PUBLICATION_DATE_FIELD))
+        List<FacetFieldDTO> publicationDateList = response.getFacetRanges().stream()
+                .filter(rangeFacet -> PUBLICATION_DATE_FIELD.equals(rangeFacet.getName()))
                 .findFirst()
-                .map(RangeFacet::getCounts)
-                .orElse(null);
-
-        List<FacetFieldDTO> publicationDateList = rangeFacetCounts.stream()
-                .map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getValue(), (long) facetFieldEntry.getCount()))
+                .map(rangeFacet -> (List<RangeFacet.Count>) rangeFacet.getCounts())
+                .stream()
+                .flatMap(counts -> counts.stream()
+                        .map(count -> new FacetFieldDTO(
+                                count.getValue(),
+                                (long) count.getCount())))
                 .toList();
 
         return new SpecimensForVolumeOverviewStatsDTO(
                 publicationDayMin,
                 publicationDayMax,
-                numberMin,
-                numberMax,
                 pagesCount,
                 response.getFacetField(MUTATION_ID_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
-                response.getFacetField(PUBLICATION_MARK_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
-                response.getFacetField(PUBLICATION_ID_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
+                response.getFacetField(MUTATION_MARK_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
+                response.getFacetField(EDITION_ID_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
                 response.getFacetField(DAMAGE_TYPES_FIELD).getValues().stream().map(facetFieldEntry -> new FacetFieldDTO(facetFieldEntry.getName(), facetFieldEntry.getCount())).toList(),
                 publicationDateList,
                 specimens
@@ -358,10 +382,30 @@ public class SpecimenService implements SpecimenDefinition {
 
     }
 
+    public NamesDTO getSpecimenNamesAndSubNames() throws SolrServerException, IOException {
+        SolrQuery solrQuery = new SolrQuery("*:*");
+        solrQuery.addFilterQuery(NUM_EXISTS_FIELD + ":true");
+        solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
+        solrQuery.setFacet(true);
+        solrQuery.addFacetField(NAME_FIELD, SUB_NAME_FIELD);
+        solrQuery.setFacetLimit(-1);
+        solrQuery.setFacetMinCount(1);
+        solrQuery.setRows(0);
 
-    public void createSpecimens(List<Specimen> specimen) {
+        QueryResponse response = solrClient.query(SPECIMEN_CORE_NAME, solrQuery);
+
+        return new NamesDTO(
+                response.getFacetField(NAME_FIELD).getValues().stream().map(FacetField.Count::getName).toList(),
+                response.getFacetField(SUB_NAME_FIELD).getValues().stream().map(FacetField.Count::getName).toList()
+        );
+    }
+
+
+    public void createSpecimens(List<Specimen> specimens) {
         try {
-            solrClient.addBeans(SPECIMEN_CORE_NAME, specimen);
+            List<Specimen> specimenList = specimens.stream().peek(Specimen::prePersist).toList();
+
+            solrClient.addBeans(SPECIMEN_CORE_NAME, specimenList);
             solrClient.commit(SPECIMEN_CORE_NAME);
             logger.info("specimens successfully created");
         } catch (Exception e) {
@@ -369,9 +413,20 @@ public class SpecimenService implements SpecimenDefinition {
         }
     }
 
-    public void updateSpecimens(List<Specimen> specimen) {
+    public void updateSpecimens(List<Specimen> specimens) {
         try {
-            solrClient.addBeans(SPECIMEN_CORE_NAME, specimen);
+            List<Specimen> specimenList = specimens.stream()
+                    .peek(specimen -> {
+                        // If the specimen was duplicated on FE, we will call only prePersist and skip preUpdate
+                        if (specimen.getCreated() == null) {
+                            specimen.prePersist();
+                        } else {
+                            specimen.preUpdate();
+                        }
+                    })
+                    .toList();
+
+            solrClient.addBeans(SPECIMEN_CORE_NAME, specimenList);
             solrClient.commit(SPECIMEN_CORE_NAME);
             logger.info("specimens successfully updated");
         } catch (Exception e) {
@@ -379,13 +434,50 @@ public class SpecimenService implements SpecimenDefinition {
         }
     }
 
-    public void deleteSpecimens(List<Specimen> specimen) {
+    public void deleteSpecimens(List<Specimen> specimens) {
         try {
-            solrClient.deleteById(SPECIMEN_CORE_NAME, specimen.stream().map(Specimen::getId).toList());
+            List<Specimen> specimenList = specimens.stream().peek(Specimen::preRemove).toList();
+
+            solrClient.addBeans(SPECIMEN_CORE_NAME, specimenList);
             solrClient.commit(SPECIMEN_CORE_NAME);
             logger.info("specimens successfully deleted");
         } catch (Exception e) {
             throw new RuntimeException("Failed to delete specimens", e);
+        }
+    }
+
+    public Optional<Specimen> getSpecimenById(String specimenId) throws SolrServerException, IOException {
+        SolrQuery solrQuery = new SolrQuery("*:*");
+        solrQuery.addFilterQuery(ID_FIELD + ":\"" + specimenId + "\"");
+        solrQuery.addFilterQuery("-" + DELETED_FIELD + ":[* TO *]");
+        solrQuery.setRows(1);
+
+        QueryResponse response = solrClient.query(SPECIMEN_CORE_NAME, solrQuery);
+
+        List<Specimen> specimenList = response.getBeans(Specimen.class);
+
+        return specimenList.isEmpty() ? Optional.empty() : Optional.of(specimenList.getFirst());
+    }
+
+    public void deleteSpecimenById(String id) throws SolrServerException, IOException {
+
+        Optional<Specimen> specimenOpt = getSpecimenById(id);
+
+        if (specimenOpt.isEmpty()) {
+            throw new RuntimeException("Specimen " + id + " not found");
+        }
+
+        Specimen specimen = specimenOpt.get();
+
+
+        try {
+            specimen.preRemove();
+
+            solrClient.addBean(SPECIMEN_CORE_NAME, specimen);
+            solrClient.commit(SPECIMEN_CORE_NAME);
+            logger.info("specimen successfully deleted");
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete specimen", e);
         }
     }
 

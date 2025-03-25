@@ -7,6 +7,7 @@ public interface VolumeDefinition {
     String DATE_FROM_FIELD = "dateFrom";
     String DATE_TO_FIELD = "dateTo";
     String META_TITLE_ID_FIELD = "metaTitleId";
+    String SUB_NAME_FIELD = "subName";
     String MUTATION_ID_FIELD = "mutationId";
     String PERIODICITY_FIELD = "periodicity";
     String FIRST_NUMBER_FIELD = "firstNumber";
@@ -17,5 +18,5 @@ public interface VolumeDefinition {
     String SIGNATURE_FIELD = "signature";
     String OWNER_ID_FIELD = "ownerId";
     String YEAR_FIELD = "year";
-    String PUBLICATION_MARK_FIELD = "publicationMark";
+    String MUTATION_MARK_FIELD = "mutationMark";
 }

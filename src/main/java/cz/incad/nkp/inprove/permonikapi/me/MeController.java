@@ -1,45 +1,30 @@
 package cz.incad.nkp.inprove.permonikapi.me;
 
 import cz.incad.nkp.inprove.permonikapi.config.security.user.UserDelegate;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nullable;
-import lombok.AllArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.stream.Collectors;
-
+@Tag(name = "Me API")
 @RestController
 @RequestMapping("/api")
-@AllArgsConstructor
 public class MeController {
+
+    private final MeService meService;
+
+    @Autowired
+    public MeController(MeService meService) {
+        this.meService = meService;
+    }
 
 
     @GetMapping("/me")
     public Me getCurrentUser(@AuthenticationPrincipal @Nullable UserDelegate userDetails) {
+        return meService.getCurrentUser(userDetails);
 
-        if (userDetails == null) {
-            return null;
-        }
-
-        Me me = new Me();
-
-        me.setId(userDetails.getId());
-        me.setName(userDetails.getUser().getFirstName() + " " + userDetails.getUser().getLastName());
-        me.setEmail(userDetails.getUser().getEmail());
-        me.setAuthorities(userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList()));
-        me.setOwners(userDetails.getUser().getOwners());
-        me.setEnabled(userDetails.isEnabled());
-        me.setRole(userDetails.getUser().getRole());
-        me.setUsername(userDetails.getUsername());
-        me.setAccountNonExpired(userDetails.isAccountNonExpired());
-        me.setAccountNonLocked(userDetails.isAccountNonLocked());
-        me.setCredentialsNonExpired(userDetails.isCredentialsNonExpired());
-
-        return me;
     }
 }

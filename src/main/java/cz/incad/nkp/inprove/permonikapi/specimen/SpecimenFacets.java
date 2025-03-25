@@ -21,8 +21,8 @@ public class SpecimenFacets implements SpecimenDefinition {
     private List<String> names;
     private List<String> subNames;
     private List<String> mutationIds;
-    private List<String> publicationIds;
-    private List<String> publicationMarks;
+    private List<String> editionIds;
+    private List<String> mutationMarks;
     private List<String> ownerIds;
     private List<String> damageTypes;
     private String barCode;
@@ -40,35 +40,35 @@ public class SpecimenFacets implements SpecimenDefinition {
     }
 
     String getNamesQueryString() {
-        return doTextListCollection(this.names, NAME_FIELD);
+        return doTextListCollection(names, NAME_FIELD);
     }
 
     String getSubNamesQueryString() {
-        return doTextListCollection(this.subNames, SUB_NAME_FIELD);
+        return doTextListCollection(subNames, SUB_NAME_FIELD);
     }
 
     String getMutationsQueryString() {
-        return doUUIDListCollection(this.mutationIds, MUTATION_ID_FIELD);
+        return doUUIDListCollection(mutationIds, MUTATION_ID_FIELD);
     }
 
-    String getPublicationsQueryString() {
-        return doUUIDListCollection(this.publicationIds, PUBLICATION_ID_FIELD);
+    String getEditionsQueryString() {
+        return doUUIDListCollection(editionIds, EDITION_ID_FIELD);
     }
 
-    String getPublicationMarkQueryString() {
-        return doTextListCollection(this.publicationMarks, PUBLICATION_MARK_FIELD);
+    String getMutationMarkQueryString() {
+        return doTextListCollection(mutationMarks, MUTATION_MARK_FIELD);
     }
 
     String getOwnersQueryString() {
-        return doUUIDListCollection(this.ownerIds, OWNER_ID_FIELD);
+        return doUUIDListCollection(ownerIds, OWNER_ID_FIELD);
     }
 
     String getDamageTypesQueryString() {
-        return doUUIDListCollection(this.damageTypes, DAMAGE_TYPES_FIELD);
+        return doUUIDListCollection(damageTypes, DAMAGE_TYPES_FIELD);
     }
 
     String getBarCodeQueryString() {
-        return BAR_CODE_FIELD + ":*" + this.barCode + "*";
+        return BAR_CODE_FIELD + ":*" + barCode + "*";
     }
 
     // Utility method to escape special characters in query strings

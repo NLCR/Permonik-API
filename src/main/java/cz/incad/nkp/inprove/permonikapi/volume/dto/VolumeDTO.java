@@ -8,6 +8,7 @@ public record VolumeDTO(
         String dateFrom,
         String dateTo,
         String metaTitleId,
+        String subName,
         String mutationId,
         List<VolumePeriodicityDTO> periodicity,
         Integer firstNumber,
@@ -17,6 +18,12 @@ public record VolumeDTO(
         String signature,
         String ownerId,
         Integer year,
-        String publicationMark
+        String mutationMark,
+        String created,
+        String createdBy,
+        String updated,
+        String updatedBy,
+        String deleted,
+        String deletedBy
 ) {
 }
